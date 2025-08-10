@@ -174,13 +174,29 @@ pytest tests/ui --browser=chromium --headed
 - `--browser=webkit`: 브라우저 엔진 지정
 
 ### 5️⃣ Allure Report 생성
-```bash
-# 테스트 실행 with Allure
-pytest --alluredir=allure-results
 
-# 리포트 생성 및 열기
-allure serve allure-results
+#### 자동 스크립트 사용 (추천)
+```bash
+./run_with_allure.sh
 ```
+
+#### 수동 실행
+```bash
+# Allure 데이터 생성하면서 테스트 실행
+pytest tests/api -v --alluredir=allure-results
+
+# 브라우저에서 리포트 보기
+allure serve allure-results
+
+# 또는 HTML 파일로 생성
+allure generate allure-results -o allure-report --clean
+open allure-report/index.html
+```
+
+#### ⚠️ 중요 참고사항
+- `pytest tests/api -v`만 실행하면 **Allure 리포트가 생성되지 않습니다**
+- 반드시 `--alluredir=allure-results` 옵션을 추가해야 합니다
+- 현재 `pytest.ini`에 설정이 추가되어 있어 일반 `pytest` 명령어로도 자동 생성됩니다
 
 ## 📊 테스트 케이스 요약
 
