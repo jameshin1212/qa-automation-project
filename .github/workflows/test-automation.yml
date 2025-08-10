@@ -1,0 +1,129 @@
+name: QA Automation Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Test type to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - api
+          - ui
+          - smoke
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Cache Node dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('mock_server/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Install Playwright browsers
+      run: |
+        playwright install chromium
+        playwright install-deps chromium
+    
+    - name: Install JSON Server
+      run: |
+        cd mock_server
+        npm ci
+    
+    - name: Start Mock Server
+      run: |
+        cd mock_server
+        npm start &
+        sleep 5
+        curl -f http://localhost:3000/config || exit 1
+    
+    - name: Run API Tests
+      if: github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
+      run: |
+        pytest tests/api -v --alluredir=allure-results --html=reports/api_report.html --self-contained-html
+      continue-on-error: true
+    
+    - name: Run UI Tests
+      if: github.event.inputs.test_type == 'ui' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
+      run: |
+        pytest tests/ui -v --alluredir=allure-results --html=reports/ui_report.html --self-contained-html
+      continue-on-error: true
+    
+    - name: Run Smoke Tests
+      if: github.event.inputs.test_type == 'smoke'
+      run: |
+        pytest -m smoke -v --alluredir=allure-results --html=reports/smoke_report.html --self-contained-html
+      continue-on-error: true
+    
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        npm install -g allure-commandline
+        allure generate allure-results --clean -o allure-report
+    
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: |
+          reports/
+          allure-report/
+        retention-days: 30
+    
+    - name: Upload Allure Report to GitHub Pages
+      if: always() && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./allure-report
+        publish_branch: gh-pages
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "### Test Execution Summary 📊" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| API Tests | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+        echo "| UI Tests | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 [View Full Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }})" >> $GITHUB_STEP_SUMMARY

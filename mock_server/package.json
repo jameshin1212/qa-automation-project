@@ -1,0 +1,15 @@
+{
+  "name": "qa-mock-server",
+  "version": "1.0.0",
+  "description": "Mock server for QA automation testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:old": "json-server --watch db.json --port 3000",
+    "start:dev": "json-server --watch db.json --port 3000 --delay 500",
+    "reset": "cp db-backup.json db.json"
+  },
+  "dependencies": {
+    "json-server": "^0.17.4"
+  }
+}

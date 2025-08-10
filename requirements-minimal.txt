@@ -1,0 +1,14 @@
+# Minimal requirements for Python 3.13 compatibility
+# Core testing
+pytest>=7.4.0
+requests>=2.31.0
+
+# UI testing (install manually)
+# playwright>=1.40.0
+# pytest-playwright>=0.4.0
+
+# Excel handling
+openpyxl>=3.1.0
+
+# Utilities
+python-dateutil>=2.8.0

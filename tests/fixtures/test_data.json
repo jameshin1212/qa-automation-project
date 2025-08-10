@@ -1,0 +1,147 @@
+{
+  "positive_cases": [
+    {
+      "email": "valid.user@test.com",
+      "password": "Test1234!",
+      "description": "Valid email and password"
+    },
+    {
+      "email": "user+tag@gmail.com",
+      "password": "Secure@Pass123",
+      "description": "Email with plus sign"
+    },
+    {
+      "email": "korean.user@naver.com",
+      "password": "Korean123!@#",
+      "description": "Korean domain email"
+    },
+    {
+      "email": "long.email.address.with.many.dots@example.com",
+      "password": "Complex$Pass999",
+      "description": "Long email address"
+    }
+  ],
+  "negative_cases": [
+    {
+      "email": "invalid-email",
+      "password": "Test1234!",
+      "description": "Invalid email format - missing @"
+    },
+    {
+      "email": "@test.com",
+      "password": "Test1234!",
+      "description": "Invalid email format - missing local part"
+    },
+    {
+      "email": "test@",
+      "password": "Test1234!",
+      "description": "Invalid email format - missing domain"
+    },
+    {
+      "email": "test@test.com",
+      "password": "short",
+      "description": "Password too short"
+    },
+    {
+      "email": "test@test.com",
+      "password": "nouppercase123!",
+      "description": "Password missing uppercase letter"
+    },
+    {
+      "email": "test@test.com",
+      "password": "NOLOWERCASE123!",
+      "description": "Password missing lowercase letter"
+    },
+    {
+      "email": "test@test.com",
+      "password": "NoNumbers!",
+      "description": "Password missing number"
+    },
+    {
+      "email": "test@test.com",
+      "password": "NoSpecial123",
+      "description": "Password missing special character"
+    },
+    {
+      "email": "",
+      "password": "Test1234!",
+      "description": "Empty email"
+    },
+    {
+      "email": "test@test.com",
+      "password": "",
+      "description": "Empty password"
+    }
+  ],
+  "boundary_cases": [
+    {
+      "email": "a@b.co",
+      "password": "Pass123!",
+      "description": "Minimum valid email length"
+    },
+    {
+      "email": "test@test.com",
+      "password": "Pass123!",
+      "description": "Minimum password length (8 chars)"
+    },
+    {
+      "email": "very.long.email.address.that.is.exactly.at.the.maximum.allowed.length.for.testing.boundaries.in.our.system.with.many.characters@test.com",
+      "password": "Test1234!",
+      "description": "Long email address"
+    },
+    {
+      "email": "test@test.com",
+      "password": "ThisIsAVeryLongPasswordThatExceedsNormalLengthButShouldStillBeAcceptedByTheSystem123!@#$%^&*()_+-=[]{}|;:,.<>?",
+      "description": "Very long password"
+    },
+    {
+      "email": "   test@test.com   ",
+      "password": "Test1234!",
+      "description": "Email with leading/trailing spaces"
+    }
+  ],
+  "security_cases": [
+    {
+      "email": "admin'--@test.com",
+      "password": "Test1234!",
+      "description": "SQL injection in email"
+    },
+    {
+      "email": "test@test.com",
+      "password": "' OR '1'='1",
+      "description": "SQL injection in password"
+    },
+    {
+      "email": "<script>alert('XSS')</script>@test.com",
+      "password": "Test1234!",
+      "description": "XSS attempt in email"
+    },
+    {
+      "email": "test@test.com",
+      "password": "<script>alert('XSS')</script>",
+      "description": "XSS attempt in password"
+    },
+    {
+      "email": "test@test.com\"; DROP TABLE users; --",
+      "password": "Test1234!",
+      "description": "SQL injection with command"
+    },
+    {
+      "email": "../../../etc/passwd@test.com",
+      "password": "Test1234!",
+      "description": "Path traversal attempt in email"
+    },
+    {
+      "email": "test@test.com",
+      "password": "../../admin/config",
+      "description": "Path traversal attempt in password"
+    }
+  ],
+  "duplicate_cases": [
+    {
+      "email": "duplicate@test.com",
+      "password": "Test1234!",
+      "description": "Email for duplicate testing"
+    }
+  ]
+}
