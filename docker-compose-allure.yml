@@ -1,0 +1,77 @@
+services:
+  # Mock API Server
+  mock-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: whatap-mock-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mock_server:/app
+      - /app/node_modules
+      - ./mock_server/db-backup.json:/app/db-backup.json:ro
+    networks:
+      - qa-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/config', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Test Runner with Allure
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-test-runner
+    depends_on:
+      mock-server:
+        condition: service_healthy
+    environment:
+      - API_BASE_URL=http://mock-server:3000
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./tests:/app/tests
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+      - ./reports:/app/reports
+    networks:
+      - qa-network
+    command: >
+      bash -c "
+        echo '🧪 Running tests with Allure...' &&
+        pytest tests/api tests/ui --alluredir=/app/allure-results -v &&
+        echo '📊 Generating Allure report...' &&
+        allure generate /app/allure-results -o /app/allure-report --clean &&
+        echo '✅ Report generated at ./allure-report/index.html'
+      "
+
+  # Allure Report Server
+  allure-serve:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-allure-serve
+    depends_on:
+      - test-runner
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/allure-results:ro
+      - ./allure-report:/app/allure-report:ro
+    networks:
+      - qa-network
+    working_dir: /app
+    command: >
+      bash -c "
+        echo '⏳ Waiting for test results...' &&
+        sleep 10 &&
+        echo '🌐 Starting Allure server on port 5050...' &&
+        allure serve /app/allure-results -p 5050 --host 0.0.0.0
+      "
+
+networks:
+  qa-network:
+    driver: bridge

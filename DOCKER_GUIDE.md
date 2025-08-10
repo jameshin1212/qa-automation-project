@@ -69,18 +69,41 @@ docker-compose run --rm test-runner pytest -v
 ```
 
 ### 4. Allure Report 생성
+
+#### 방법 1: 자동 스크립트 사용 (추천) 🎯
 ```bash
-# 테스트 실행 후 리포트 생성
+# Allure 전용 스크립트 실행
+./docker-allure.sh
+
+# 옵션 선택:
+# 1) 테스트 실행 + 리포트 생성
+# 2) 기존 결과로 리포트만 생성
+# 3) Allure 서버 실행
+# 4) 전체 실행
+```
+
+#### 방법 2: 수동 실행
+```bash
+# 테스트 실행 with Allure
 docker-compose run --rm test-runner bash -c "
-  pytest --alluredir=allure-results -v &&
-  allure generate allure-results -o allure-report --clean
+  pytest tests/api tests/ui --alluredir=/app/allure-results -v
 "
+
+# 리포트 생성
+docker-compose run --rm test-runner bash -c "
+  allure generate /app/allure-results -o /app/allure-report --clean
+"
+
+# 로컬에서 리포트 열기
+open allure-report/index.html
 ```
 
 ### 5. Allure Report 서버 실행
 ```bash
-# 프로필과 함께 실행
-docker-compose --profile with-report up
+# Docker 컨테이너에서 Allure 서버 실행
+docker-compose run --rm -p 5050:5050 test-runner bash -c "
+  allure serve /app/allure-results -p 5050 --host 0.0.0.0
+"
 
 # 브라우저에서 확인
 open http://localhost:5050
