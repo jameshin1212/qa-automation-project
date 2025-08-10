@@ -210,6 +210,27 @@ open allure-report/index.html
 - 반드시 `--alluredir=allure-results` 옵션을 추가해야 합니다
 - 현재 `pytest.ini`에 설정이 추가되어 있어 일반 `pytest` 명령어로도 자동 생성됩니다
 
+#### 📌 Allure Report 열기 (CORS 문제 해결)
+HTML 파일을 직접 열면 CORS 문제로 데이터가 로드되지 않습니다. 다음 방법 중 하나를 사용하세요:
+
+**방법 1: 자동 스크립트 (추천)**
+```bash
+./serve-allure.sh
+# 옵션 1 또는 2 선택
+```
+
+**방법 2: Python HTTP Server**
+```bash
+cd allure-report
+python3 -m http.server 8080
+# 브라우저에서 http://localhost:8080 열기
+```
+
+**방법 3: Allure Serve**
+```bash
+allure serve allure-results
+```
+
 ## 📊 테스트 케이스 요약
 
 ### 카테고리별 분포

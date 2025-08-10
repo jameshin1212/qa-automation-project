@@ -152,12 +152,23 @@ curl http://localhost:3000/config
 테스트 실행 시 콘솔에 결과가 표시됩니다.
 
 ### 2. Allure Report
-```bash
-# HTML 리포트 생성
-docker-compose run --rm test-runner allure generate allure-results -o allure-report
 
-# 로컬에서 열기
-open allure-report/index.html
+#### ⚠️ CORS 문제 해결
+`open allure-report/index.html`로 직접 열면 CORS 문제로 데이터가 로드되지 않습니다.
+
+#### 올바른 방법:
+```bash
+# 방법 1: 자동 스크립트 (추천)
+./serve-allure.sh
+
+# 방법 2: Python HTTP Server
+cd allure-report && python3 -m http.server 8080
+# 브라우저에서 http://localhost:8080 열기
+
+# 방법 3: Docker Allure Server
+docker-compose run --rm -p 5050:5050 test-runner \
+  allure serve /app/allure-results -p 5050 --host 0.0.0.0
+# 브라우저에서 http://localhost:5050 열기
 ```
 
 ### 3. 볼륨 마운트된 결과
