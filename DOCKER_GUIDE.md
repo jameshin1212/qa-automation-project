@@ -5,10 +5,6 @@
 - **Docker**: 20.10 이상
 - **Docker Compose**: 2.0 이상
 
-### Docker 설치
-- **Mac/Windows**: [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- **Linux**: [Docker Engine](https://docs.docker.com/engine/install/)
-
 ## 🚀 빠른 시작 (Quick Start)
 
 ### 방법 1: 자동 스크립트 사용 (추천) 🎯

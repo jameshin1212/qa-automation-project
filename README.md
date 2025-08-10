@@ -68,18 +68,14 @@ qa-automation-project/
 
 ## 🚀 빠른 시작
 
-### 🐳 방법 1: Docker로 실행 (추천 - 채용 담당자용)
-
+### 🐳 방법 1: Docker로 실행 
 **환경 설정 없이 바로 테스트를 실행할 수 있습니다!**
-
 ```bash
 # Docker가 설치되어 있다면 바로 실행 가능
 ./docker-run.sh
-
 # 또는 Docker Compose 사용
 docker-compose up
 ```
-
 📖 상세 가이드: [DOCKER_GUIDE.md](./DOCKER_GUIDE.md)
 
 ### 💻 방법 2: 로컬 환경에서 실행

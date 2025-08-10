@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Mock API Server
   mock-server:
@@ -12,10 +10,11 @@ services:
     volumes:
       - ./mock_server:/app
       - /app/node_modules
+      - ./mock_server/db-backup.json:/app/db-backup.json:ro
     networks:
       - qa-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/config"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/config', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,6 +31,7 @@ services:
         condition: service_healthy
     environment:
       - API_BASE_URL=http://mock-server:3000
+      - PYTHONUNBUFFERED=1
       - DISPLAY=:99
     volumes:
       - ./tests:/app/tests

@@ -28,42 +28,66 @@ def setup_test_environment():
     # Create reports directory if not exists
     REPORTS_DIR.mkdir(exist_ok=True)
     
-    # Start JSON Server
-    print("Starting JSON Server...")
-    process = subprocess.Popen(
-        ["npm", "start"],
-        cwd=MOCK_SERVER_DIR,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    
-    # Wait for server to be ready
-    max_retries = 30
-    for i in range(max_retries):
-        try:
-            response = requests.get(f"{API_BASE_URL}/config")
-            if response.status_code == 200:
-                print("JSON Server is ready!")
-                break
-        except requests.exceptions.ConnectionError:
-            time.sleep(1)
+    # Check if we're in Docker environment
+    if os.getenv("API_BASE_URL", "").startswith("http://mock-server"):
+        print("Running in Docker environment, skipping local server start")
+        # Just wait for the mock-server to be ready
+        max_retries = 30
+        for i in range(max_retries):
+            try:
+                response = requests.get(f"{API_BASE_URL}/config")
+                if response.status_code == 200:
+                    print("Mock Server is ready!")
+                    break
+            except requests.exceptions.ConnectionError:
+                time.sleep(1)
+        else:
+            raise RuntimeError("Failed to connect to Mock Server")
+        
+        yield
+        
+        print("\n=== Test environment cleanup (Docker) ===")
     else:
+        # Start JSON Server locally
+        print("Starting JSON Server...")
+        process = subprocess.Popen(
+            ["npm", "start"],
+            cwd=MOCK_SERVER_DIR,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        
+        # Wait for server to be ready
+        max_retries = 30
+        for i in range(max_retries):
+            try:
+                response = requests.get(f"{API_BASE_URL}/config")
+                if response.status_code == 200:
+                    print("JSON Server is ready!")
+                    break
+            except requests.exceptions.ConnectionError:
+                time.sleep(1)
+        else:
+            process.terminate()
+            raise RuntimeError("Failed to start JSON Server")
+        
+        yield
+        
+        # Cleanup
+        print("\n=== Cleaning up test environment ===")
         process.terminate()
-        raise RuntimeError("Failed to start JSON Server")
-    
-    yield
-    
-    # Cleanup
-    print("\n=== Cleaning up test environment ===")
-    process.terminate()
-    process.wait()
+        process.wait()
 
 @pytest.fixture(autouse=True)
 def reset_database():
     """Reset database before each test"""
-    # Copy backup to active database
-    backup_path = MOCK_SERVER_DIR / "db-backup.json"
-    db_path = MOCK_SERVER_DIR / "db.json"
+    # In Docker, db.json is at /app/db.json
+    if os.getenv("API_BASE_URL", "").startswith("http://mock-server"):
+        backup_path = Path("/app/db-backup.json")
+        db_path = Path("/app/db.json")
+    else:
+        backup_path = MOCK_SERVER_DIR / "db-backup.json"
+        db_path = MOCK_SERVER_DIR / "db.json"
     
     shutil.copy(backup_path, db_path)
     time.sleep(0.5)  # Wait for JSON Server to reload
