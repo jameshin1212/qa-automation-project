@@ -95,7 +95,7 @@ docker-compose run --rm test-runner bash -c "
 "
 
 # 로컬에서 리포트 열기
-open allure-report/index.html
+allure serve allure-results
 ```
 
 ### 5. Allure Report 서버 실행

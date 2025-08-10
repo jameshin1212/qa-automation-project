@@ -131,16 +131,20 @@ cd ..
 ### 수동 초기화
 ```bash
 # Allure 결과만 삭제
-rm -rf allure-results/*
+rm -rf allure-results
 
 # Allure 리포트만 삭제
-rm -rf allure-report/*
+rm -rf allure-report
 
-# 모두 삭제
-rm -rf allure-results/* allure-report/* reports/*
+# 모두 삭제 (디렉토리는 유지하고 내용만 삭제)
+find allure-results allure-report reports -type f -delete 2>/dev/null
 
 # 전체 초기화 (캐시 포함)
-rm -rf allure-results/* allure-report/* reports/* .pytest_cache __pycache__
+rm -rf allure-results allure-report reports .pytest_cache
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null
+
+# 디렉토리 재생성
+mkdir -p allure-results allure-report reports
 ```
 
 ## 🏃‍♂️ 테스트 실행
@@ -325,4 +329,37 @@ pytest -vv --log-cli-level=DEBUG
 
 # 특정 테스트만 실행
 pytest tests/api/test_registration_positive.py::TestRegistrationPositive::test_registration_valid_email_password_success -v
+```
+
+
+
+
+### 0. Docker 백그라운드 실행
+```bash
+docker-compose up -d
+```
+### 1. API 테스트만
+```bash
+docker-compose run --rm test-runner pytest tests/api -v
+```
+### 2. UI 테스트만
+```bash
+docker-compose run --rm test-runner pytest tests/ui -v
+```
+### 3. 전체 테스트
+```bash
+docker-compose run --rm test-runner pytest -v
+```
+### 4. 리포트 확인
+```bash
+allure serve allure-results
+```
+### 5. 리포트 초기화
+```bash
+# 자동 스크립트 사용 (추천)
+./clean-reports.sh
+
+# 또는 수동 초기화
+rm -rf allure-results allure-report reports .pytest_cache
+mkdir -p allure-results allure-report reports
 ```
