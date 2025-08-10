@@ -147,6 +147,37 @@ find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null
 mkdir -p allure-results allure-report reports
 ```
 
+## 🔄 데이터베이스 초기화
+
+중복 테스트 실패 등으로 데이터베이스를 초기화해야 할 때:
+
+### 자동 스크립트 사용 (추천)
+```bash
+./reset-db.sh
+# 옵션 선택:
+# 1) DB 초기화 (백업에서 복원)
+# 2) 현재 DB 백업 후 초기화
+# 3) 특정 이메일만 삭제
+# 4) 모든 사용자 삭제 (설정은 유지)
+# 5) DB 상태만 확인
+```
+
+### 수동 초기화
+```bash
+# 백업에서 복원
+cp mock_server/db-backup.json mock_server/db.json
+
+# 특정 이메일 삭제 (Python 사용)
+python3 -c "
+import json
+with open('mock_server/db.json', 'r') as f:
+    data = json.load(f)
+data['users'] = [u for u in data['users'] if u['email'] != 'test@example.com']
+with open('mock_server/db.json', 'w') as f:
+    json.dump(data, f, indent=2)
+"
+```
+
 ## 🏃‍♂️ 테스트 실행
 
 ### 1️⃣ Mock 서버 시작
