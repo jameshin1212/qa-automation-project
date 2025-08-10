@@ -120,6 +120,29 @@ npm install
 cd ..
 ```
 
+## 🧹 테스트 결과 초기화
+
+### 자동 스크립트 사용
+```bash
+./clean-reports.sh
+# 원하는 옵션 선택
+```
+
+### 수동 초기화
+```bash
+# Allure 결과만 삭제
+rm -rf allure-results/*
+
+# Allure 리포트만 삭제
+rm -rf allure-report/*
+
+# 모두 삭제
+rm -rf allure-results/* allure-report/* reports/*
+
+# 전체 초기화 (캐시 포함)
+rm -rf allure-results/* allure-report/* reports/* .pytest_cache __pycache__
+```
+
 ## 🏃‍♂️ 테스트 실행
 
 ### 1️⃣ Mock 서버 시작
