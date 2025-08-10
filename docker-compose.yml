@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Mock API Server
+  mock-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: whatap-mock-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mock_server:/app
+      - /app/node_modules
+    networks:
+      - qa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/config"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Test Runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-test-runner
+    depends_on:
+      mock-server:
+        condition: service_healthy
+    environment:
+      - API_BASE_URL=http://mock-server:3000
+      - DISPLAY=:99
+    volumes:
+      - ./tests:/app/tests
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+      - ./reports:/app/reports
+    networks:
+      - qa-network
+    command: >
+      bash -c "
+        pytest tests/api tests/ui --alluredir=allure-results -v &&
+        allure generate allure-results -o allure-report --clean
+      "
+
+  # Allure Report Server (선택사항)
+  allure-ui:
+    image: "frankescobar/allure-docker-service-ui:latest"
+    container_name: whatap-allure-ui
+    depends_on:
+      - test-runner
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/allure-results
+    networks:
+      - qa-network
+    profiles:
+      - with-report
+
+networks:
+  qa-network:
+    driver: bridge
+
+volumes:
+  allure-results:
+  allure-report:

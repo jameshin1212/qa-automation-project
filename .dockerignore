@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+allure-results/
+allure-report/
+reports/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database (테스트 중 생성되는 파일)
+mock_server/db.json
+mock_server/db-*.json
+!mock_server/db-backup.json
+
+# Logs
+*.log
+logs/
+server.log
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Documentation (선택사항)
+*.md
+!README.md
+!postman/README.md
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
