@@ -79,11 +79,10 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 3. **Python 의존성 설치**
 ```bash
-# Python 3.8 ~ 3.12 사용 시
 pip install -r requirements.txt
 
-# Python 3.13 사용 시 (pandas 호환성 문제)
-pip install -r requirements-py313.txt
+# Python 3.8-3.12 사용자: pandas 설치 (선택사항 - Excel 문서 생성용)
+pip install pandas==2.1.4
 ```
 
 4. **Playwright 브라우저 설치**
