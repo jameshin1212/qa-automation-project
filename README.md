@@ -1,5 +1,12 @@
 # 🧪 QA Automation Project - User Registration System
 
+[![QA Automation Tests](https://github.com/jameshin1212/qa-automation-project/actions/workflows/test-automation.yml/badge.svg)](https://github.com/jameshin1212/qa-automation-project/actions/workflows/test-automation.yml)
+[![GitHub](https://img.shields.io/badge/GitHub-qa--automation--project-blue?logo=github)](https://github.com/jameshin1212/qa-automation-project)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)](https://www.python.org/)
+[![Pytest](https://img.shields.io/badge/Pytest-Framework-green?logo=pytest)](https://pytest.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E-green?logo=microsoft-edge)](https://playwright.dev/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
+
 ## 📌 프로젝트 소개
 안녕하세요.
 QA지원자 신동혁 입니다. 해당 프로젝트는 웹 애플리케이션의 **사용자 등록 시스템**에 대한 종합적인 품질 검증을 위한 자동화 테스트 프레임워크입니다. API와 UI 레벨에서 체계적인 테스트를 수행하고, CI/CD 파이프라인과 통합되어 지속적인 품질 모니터링을 제공합니다.
