@@ -22,7 +22,7 @@ chmod +x docker-run.sh
 docker-compose up
 
 # 백그라운드 실행
-docker-compose up -d
+docker-compose up -d 
 
 # 로그 확인
 docker-compose logs -f

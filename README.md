@@ -364,10 +364,12 @@ pytest tests/api/test_registration_positive.py::TestRegistrationPositive::test_r
 
 
 
+🐳Docker 테스트 실행 순서
 
-### 0. Docker 백그라운드 실행
+### 0. 🐳Docker 백그라운드 실행(mock server실행)
 ```bash
-docker-compose up -d
+docker-compose up -d mock-server 
+#```docker-compose down```(docker종료)
 ```
 ### 1. API 테스트만
 ```bash
@@ -389,8 +391,41 @@ allure serve allure-results
 ```bash
 # 자동 스크립트 사용 (추천)
 ./clean-reports.sh
-
 # 또는 수동 초기화
 rm -rf allure-results allure-report reports .pytest_cache
 mkdir -p allure-results allure-report reports
 ```
+### 6. 데이터 초기화
+```bash
+# 자동 스크립트 사용
+ ./reset-db.sh
+ ```
+
+
+🤖 브라우저 GUI 자동화 테스트 실행 (로컬)
+
+### 0. Python 가상환경 설정
+```bash
+python3 -m venv venv
+source venv/bin/activate 
+#```deactivate```(가상환경 종료)
+```
+### 1. mock_server 실행 (새로운 터미널 창)
+```bash
+cd mock_server
+npm start
+#```  kill -9 $(lsof -t -i:3000)```(mock_server종료)
+```
+### 2. 브라우저 GUI 테스트 
+```bash
+# 브라우저 화면 표시 모드 (테스트 동작 확인)
+pytest tests/ui -v --headed
+# 느린 모션으로 동작 관찰
+pytest tests/ui -v --headed --slowmo=2000
+``` 
+
+
+
+
+      
+ 
