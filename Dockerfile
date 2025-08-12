@@ -86,5 +86,9 @@ ENV API_BASE_URL=http://localhost:3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/config || exit 1
 
+# Docker 테스트 스크립트 복사 및 실행 권한
+COPY docker_test.sh /docker_test.sh
+RUN chmod +x /docker_test.sh
+
 # 기본 실행 명령
-CMD ["bash", "-c", "cd mock_server && npm start & sleep 5 && pytest -v"]
+CMD ["/docker_test.sh"]

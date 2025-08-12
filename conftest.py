@@ -28,25 +28,21 @@ def setup_test_environment():
     # Create reports directory if not exists
     REPORTS_DIR.mkdir(exist_ok=True)
     
-    # Check if we're in Docker environment
-    if os.getenv("API_BASE_URL", "").startswith("http://mock-server"):
-        print("Running in Docker environment, skipping local server start")
-        # Just wait for the mock-server to be ready
-        max_retries = 30
-        for i in range(max_retries):
-            try:
-                response = requests.get(f"{API_BASE_URL}/config")
-                if response.status_code == 200:
-                    print("Mock Server is ready!")
-                    break
-            except requests.exceptions.ConnectionError:
-                time.sleep(1)
-        else:
-            raise RuntimeError("Failed to connect to Mock Server")
-        
+    # Check if we're in Docker environment or server is already running
+    server_already_running = False
+    try:
+        response = requests.get(f"{API_BASE_URL}/config", timeout=1)
+        if response.status_code == 200:
+            server_already_running = True
+            print("Mock Server is already running!")
+    except:
+        pass
+    
+    if server_already_running:
+        # Server is already running (Docker or manually started)
+        print("Using existing Mock Server")
         yield
-        
-        print("\n=== Test environment cleanup (Docker) ===")
+        print("\n=== Test environment cleanup (existing server) ===")
     else:
         # Start JSON Server locally
         print("Starting JSON Server...")
@@ -91,14 +87,11 @@ def setup_test_environment():
 @pytest.fixture(autouse=True)
 def reset_database():
     """Reset database before each test"""
-    # In Docker, db.json is at /app/db.json
-    if os.getenv("API_BASE_URL", "").startswith("http://mock-server"):
-        backup_path = Path("/app/db-backup.json")
-        db_path = Path("/app/db.json")
-    else:
-        backup_path = MOCK_SERVER_DIR / "db-backup.json"
-        db_path = MOCK_SERVER_DIR / "db.json"
+    # Always use paths relative to project structure
+    backup_path = MOCK_SERVER_DIR / "db-backup.json"
+    db_path = MOCK_SERVER_DIR / "db.json"
     
+    # In Docker, these paths are also correct since we mount the entire app
     shutil.copy(backup_path, db_path)
     time.sleep(0.5)  # Wait for JSON Server to reload
     
