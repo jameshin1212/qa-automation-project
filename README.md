@@ -65,6 +65,10 @@ qa-automation-project/
 
 ## 💼 Pre-Condition
 
+### ⚠️ Python 버전 호환성
+- **권장**: Python 3.10 ~ 3.12
+- **Python 3.13 사용자**: [PYTHON_COMPATIBILITY.md](./PYTHON_COMPATIBILITY.md) 참조
+
 1. **프로젝트 클론**
 ```bash
 git clone https://github.com/jameshin1212/qa-automation-project
@@ -73,16 +77,18 @@ cd qa-automation-project
 
 2. **Python 가상환경 설정**
 ```bash
-python3 -m venv venv
+# Python 3.12 권장 (모든 기능 지원)
+python3.12 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
 3. **Python 의존성 설치**
 ```bash
+# 전체 패키지 설치 (Python 3.8-3.12)
 pip install -r requirements.txt
 
-# Python 3.8-3.12 사용자: pandas 설치 (선택사항 - Excel 문서 생성용)
-pip install pandas==2.1.4
+# Python 3.13 사용자 - API 테스트만 가능
+pip install -r requirements-api-only.txt
 ```
 
 4. **Playwright 브라우저 설치**

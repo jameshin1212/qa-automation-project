@@ -9,6 +9,8 @@ requests==2.31.0
 jsonschema==4.20.0
 
 # UI testing
+# Note: For Python 3.13, greenlet (playwright dependency) has compatibility issues
+# Workaround: Install with --no-build-isolation flag or use Python 3.12
 playwright==1.40.0
 pytest-playwright==0.4.3
 

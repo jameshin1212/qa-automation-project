@@ -1,0 +1,27 @@
+# API Testing Only Requirements (Python 3.13 Compatible)
+# Use this file if you only need API testing without UI testing
+
+# Core testing frameworks
+pytest==7.4.3
+pytest-html==4.1.1
+pytest-xdist==3.5.0
+pytest-rerunfailures==12.0
+
+# API testing
+requests==2.31.0
+jsonschema==4.20.0
+
+# Reporting
+allure-pytest==2.13.2
+pytest-json-report==1.5.0
+
+# Data handling
+faker==20.1.0
+python-dotenv==1.0.0
+
+# Excel handling
+openpyxl==3.1.2
+
+# Utilities
+colorlog==6.8.0
+python-dateutil==2.8.2
