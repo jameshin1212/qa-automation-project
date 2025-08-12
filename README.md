@@ -66,7 +66,7 @@ qa-automation-project/
 ## 💼 Pre-Condition
 
 ### ⚠️ Python 버전 호환성
-- **권장**: Python 3.10 ~ 3.12
+- **권장**: Python 3.12
 - **Python 3.13 사용자**: [PYTHON_COMPATIBILITY.md](./PYTHON_COMPATIBILITY.md) 참조
 
 1. **프로젝트 클론**
@@ -78,17 +78,14 @@ cd qa-automation-project
 2. **Python 가상환경 설정**
 ```bash
 # Python 3.12 권장 (모든 기능 지원)
-python3.12 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+  python3.12 -m venv venv
+  source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
 3. **Python 의존성 설치**
 ```bash
 # 전체 패키지 설치 (Python 3.8-3.12)
 pip install -r requirements.txt
-
-# Python 3.13 사용자 - API 테스트만 가능
-pip install -r requirements-api-only.txt
 ```
 
 4. **Playwright 브라우저 설치**
@@ -112,7 +109,7 @@ npm start
 # 서버가 http://localhost:3000 에서 실행됩니다
 ```
 
-### 2️⃣ 전체 테스트 실행
+### 2️⃣ 테스트 실행
 새 터미널에서:
 ```bash
 pytest -v
@@ -186,41 +183,10 @@ GitHub Actions를 통한 자동화된 테스트 실행:
    - GitHub Pages에 Allure Report 자동 배포
    - PR에 테스트 요약 코멘트
 
-
-## 🐛 문제 해결
-
-### Mock 서버 연결 실패
-```bash
-# 포트 확인
-lsof -i :3000  # Mac/Linux
-netstat -ano | findstr :3000  # Windows
-
-# 프로세스 종료 후 재시작
-kill -9 <PID>
-cd mock_server && npm start
-```
-
-### Playwright 브라우저 오류
-```bash
-# 브라우저 재설치
-playwright install --force chromium
-playwright install-deps
-```
-
-### 테스트 실패 디버깅
-```bash
-# 상세 로그와 함께 실행
-pytest -vv --log-cli-level=DEBUG
-
-# 특정 테스트만 실행
-pytest tests/api/test_registration_positive.py::TestRegistrationPositive::test_registration_valid_email_password_success -v
-```
-
-
 🖥️ 프로젝트 클론
 ### 1. **git**
 ```bash
-git clone <https://github.com/jameshin1212/qa-automation-project>
+git clone https://github.com/jameshin1212/qa-automation-project
 cd qa-automation-project
 ```
 🐳 Docker 테스트 실행 순서

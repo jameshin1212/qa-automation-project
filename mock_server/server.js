@@ -13,6 +13,18 @@ server.use(middlewares);
 // Parse JSON bodies
 server.use(jsonServer.bodyParser);
 
+// Add /config endpoint for health check
+server.get('/config', (req, res) => {
+  const db = router.db.getState();
+  res.json(db.config || {
+    password_min_length: 8,
+    password_max_length: 128,
+    email_max_length: 255,
+    allowed_domains: ["gmail.com", "naver.com", "test.com", "example.com"],
+    password_regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+  });
+});
+
 // Add custom middleware for /api/register
 server.use(customMiddleware);
 

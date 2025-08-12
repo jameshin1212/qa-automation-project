@@ -61,9 +61,19 @@ def setup_test_environment():
         max_retries = 30
         for i in range(max_retries):
             try:
-                response = requests.get(f"{API_BASE_URL}/config")
+                # Try /config first, fallback to /users endpoint
+                try:
+                    response = requests.get(f"{API_BASE_URL}/config")
+                    if response.status_code == 200:
+                        print("JSON Server is ready! (config endpoint)")
+                        break
+                except:
+                    pass
+                
+                # Fallback to /users endpoint
+                response = requests.get(f"{API_BASE_URL}/users")
                 if response.status_code == 200:
-                    print("JSON Server is ready!")
+                    print("JSON Server is ready! (users endpoint)")
                     break
             except requests.exceptions.ConnectionError:
                 time.sleep(1)
