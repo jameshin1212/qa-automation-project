@@ -1,5 +1,8 @@
 # 🐳 Docker Quick Start Guide
 
+## 📌 이 문서보다 더 명확한 가이드가 필요하신가요?
+**채용 담당자님을 위한 단계별 가이드**: 👉 **[DOCKER_STEP_BY_STEP.md](DOCKER_STEP_BY_STEP.md)**
+
 ## 환경 독립적인 테스트 실행 - 3분 완료!
 
 Docker를 사용하면 Python 버전이나 의존성 충돌 걱정 없이 테스트를 실행할 수 있습니다.

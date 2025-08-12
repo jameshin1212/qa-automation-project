@@ -1,42 +1,124 @@
 version: '3.8'
 
 services:
-  # 통합 테스트 환경 (Mock 서버 + 테스트 러너)
-  qa-test:
+  # Mock 서버 (독립 실행)
+  qa-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: whatap-qa-test
+    container_name: whatap-qa-server
     environment:
       - PYTHONUNBUFFERED=1
-      - API_BASE_URL=http://localhost:3000
-    volumes:
-      - ./allure-results:/app/allure-results
-      - ./allure-report:/app/allure-report
-      - ./reports:/app/reports
     ports:
       - "3000:3000"  # Mock server port
-      - "5050:5050"  # Allure report port (optional)
     command: >
       bash -c "
-        echo '🚀 Starting WhaTap QA Automation Tests...' &&
-        cd mock_server && npm start &
-        echo '⏳ Waiting for mock server to be ready...' &&
-        sleep 5 &&
-        for i in {1..30}; do
-          curl -s http://localhost:3000/config > /dev/null 2>&1 && break || echo 'Waiting for server... ('$$i'/30)' && sleep 1;
-        done &&
-        echo '✅ Mock server is ready!' &&
-        echo '🧪 Running tests...' &&
-        pytest -v &&
-        echo '✅ Tests completed!' &&
-        if [ -d allure-results ] && [ \"$(ls -A allure-results)\" ]; then
-          echo '📊 Generating Allure report...' &&
-          allure generate allure-results -o allure-report --clean &&
-          echo '📊 Allure report generated at /app/allure-report';
-        fi &&
-        echo '🎉 All tasks completed successfully!'
-      "
+        echo '🚀 Starting Mock Server...' &&
+        cd mock_server && npm start"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/config"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+  
+  # API 테스트 전용
+  api-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-api-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_BASE_URL=http://qa-server:3000
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./reports:/app/reports
+    depends_on:
+      qa-server:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo '🧪 Running API Tests...' &&
+        echo '================================' &&
+        pytest tests/api -v --alluredir=allure-results &&
+        echo '================================' &&
+        echo '✅ API Tests Completed!' &&
+        echo 'Total: 25 API test cases executed'"
+    networks:
+      - default
+
+  # UI 테스트 전용
+  ui-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-ui-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_BASE_URL=http://qa-server:3000
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./reports:/app/reports
+    depends_on:
+      qa-server:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo '🖥️ Running UI Tests...' &&
+        echo '================================' &&
+        pytest tests/ui -v --alluredir=allure-results &&
+        echo '================================' &&
+        echo '✅ UI Tests Completed!' &&
+        echo 'Total: 6 UI test cases executed'"
+    networks:
+      - default
+
+  # 전체 테스트 (API + UI)
+  all-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-all-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_BASE_URL=http://qa-server:3000
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./reports:/app/reports
+    depends_on:
+      qa-server:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo '🧪 Running All Tests (API + UI)...' &&
+        echo '================================' &&
+        pytest -v --alluredir=allure-results &&
+        echo '================================' &&
+        echo '✅ All Tests Completed!' &&
+        echo 'Total: 31 test cases (25 API + 6 UI) executed'"
+    networks:
+      - default
+
+  # Allure Report 서버
+  allure-report:
+    image: frankescobar/allure-docker-service:latest
+    container_name: whatap-allure-report
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/default-results
+      - ./allure-report:/app/default-reports
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 3
+      KEEP_HISTORY: "TRUE"
+    command: >
+      bash -c "
+        echo '📊 Starting Allure Report Server...' &&
+        echo '================================' &&
+        echo '🌐 Access report at: http://localhost:5050' &&
+        echo '================================' &&
+        /app/runAllureServer.sh"
 
   # 개별 Mock 서버 (필요시 사용)
   mock-server:

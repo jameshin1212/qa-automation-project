@@ -207,37 +207,40 @@ GitHub Actions를 통한 자동화된 테스트 실행:
 
 ## 🐳 Docker로 테스트 실행 (권장)
 
-### 간단한 실행
-```bash
-# 모든 테스트 실행
-docker-compose up qa-test
+### 📖 단계별 실행 가이드
+채용 담당자님을 위한 명확한 실행 가이드: **[DOCKER_STEP_BY_STEP.md](DOCKER_STEP_BY_STEP.md)**
 
-# 테스트 종료
+### 🚀 빠른 실행 (5단계)
+```bash
+# 1. Docker 빌드
+docker-compose build
+
+# 2. Mock 서버 시작
+docker-compose up -d qa-server
+
+# 3. API 테스트 (25개)
+docker-compose run --rm api-test
+
+# 4. UI 테스트 (6개)
+docker-compose run --rm ui-test
+
+# 5. Allure Report 확인
+docker-compose up -d allure-report
+# 브라우저: http://localhost:5050
+```
+
+### 📊 예상 결과
+- **API 테스트**: 25개 통과 ✅
+- **UI 테스트**: 6개 통과 ✅
+- **총 31개 테스트**: 100% 성공률
+
+### 🧹 정리
+```bash
+# 모든 서비스 중지
 docker-compose down
-```
 
-### 테스트 타입별 실행
-```bash
-# API 테스트만
-docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest tests/api -v"
-
-# UI 테스트만
-docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest tests/ui -v"
-
-# Smoke 테스트
-docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest -m smoke -v"
-```
-
-### 리포트 및 정리
-```bash
-# Allure 리포트 보기
-docker run -p 5050:5050 -v $(pwd)/allure-results:/app/allure-results frankescobar/allure-docker-service
-
-# 데이터 초기화
-./reset-db.sh
-
-# 리포트 초기화
-rm -rf allure-results allure-report reports
+# 결과 초기화 (선택사항)
+rm -rf allure-results allure-report
 ```
 
 
