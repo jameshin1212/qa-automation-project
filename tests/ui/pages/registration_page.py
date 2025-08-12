@@ -9,7 +9,13 @@ class RegistrationPage:
     
     def __init__(self, page: Page):
         self.page = page
-        self.url = "http://localhost:3000/index.html"
+        import os
+        # Docker 환경에서는 qa-server 사용
+        base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        if "qa-server" in base_url:
+            self.url = "http://qa-server:3000/index.html"
+        else:
+            self.url = "http://localhost:3000/index.html"
         
         # Locators
         self.email_input = page.locator('[data-testid="email-input"]')

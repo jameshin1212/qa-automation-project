@@ -11,6 +11,8 @@ services:
       - PYTHONUNBUFFERED=1
     ports:
       - "3000:3000"  # Mock server port
+    networks:
+      - qa-network
     command: >
       bash -c "
         echo '🚀 Starting Mock Server...' &&
@@ -46,7 +48,7 @@ services:
         echo '✅ API Tests Completed!' &&
         echo 'Total: 25 API test cases executed'"
     networks:
-      - default
+      - qa-network
 
   # UI 테스트 전용
   ui-test:
@@ -72,7 +74,7 @@ services:
         echo '✅ UI Tests Completed!' &&
         echo 'Total: 6 UI test cases executed'"
     networks:
-      - default
+      - qa-network
 
   # 전체 테스트 (API + UI)
   all-test:
@@ -98,7 +100,7 @@ services:
         echo '✅ All Tests Completed!' &&
         echo 'Total: 31 test cases (25 API + 6 UI) executed'"
     networks:
-      - default
+      - qa-network
 
   # Allure Report 서버
   allure-report:
@@ -107,18 +109,13 @@ services:
     ports:
       - "5050:5050"
     volumes:
-      - ./allure-results:/app/default-results
+      - ./allure-results:/app/allure-results-example/default
       - ./allure-report:/app/default-reports
     environment:
       CHECK_RESULTS_EVERY_SECONDS: 3
       KEEP_HISTORY: "TRUE"
-    command: >
-      bash -c "
-        echo '📊 Starting Allure Report Server...' &&
-        echo '================================' &&
-        echo '🌐 Access report at: http://localhost:5050' &&
-        echo '================================' &&
-        /app/runAllureServer.sh"
+    networks:
+      - qa-network
 
   # 개별 Mock 서버 (필요시 사용)
   mock-server:
@@ -161,5 +158,5 @@ services:
       - dev
 
 networks:
-  default:
-    name: qa-network
+  qa-network:
+    driver: bridge
