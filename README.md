@@ -9,6 +9,7 @@ QA지원자 신동혁 입니다. 해당 프로젝트는 웹 애플리케이션�
 - 🤖 **100% 자동화 구현**
 - 📊 **Allure Report 통합**
 - 🔄 **GitHub Actions CI/CD**
+- 🐳 **Docker 지원으로 환경 독립적 실행**
 
 ## 🏗️ 기술 스택
 | 영역 | 기술 | 설명 |
@@ -63,41 +64,63 @@ qa-automation-project/
 └── README.md                   # 프로젝트 가이드 문서
 ```
 
-## 💼 Pre-Condition
+## 🚀 빠른 시작 (권장)
 
-### ⚠️ Python 버전 호환성
+### 🐳 방법 1: Docker 사용 (가장 간단 - 환경 독립적)
+```bash
+# 1. 프로젝트 클론
+git clone https://github.com/jameshin1212/qa-automation-project
+cd qa-automation-project
+
+# 2. Docker로 테스트 실행
+docker-compose up qa-test
+
+# 완료! 모든 테스트가 자동으로 실행됩니다.
+```
+
+📖 자세한 Docker 사용법: [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)
+
+### 💻 방법 2: 로컬 환경 설정
+<details>
+<summary>로컬 설치 방법 보기</summary>
+
+#### Python 버전 요구사항
 - **권장**: Python 3.12
+- **지원**: Python 3.8 ~ 3.12
 
+#### 설치 단계
 1. **프로젝트 클론**
 ```bash
 git clone https://github.com/jameshin1212/qa-automation-project
 cd qa-automation-project
 ```
 
-2. **Python 가상환경 설정**
+2. **자동 설정 스크립트 실행**
 ```bash
-# Python 3.12 권장 (모든 기능 지원)
-  python3.12 -m venv venv
-  source venv/bin/activate  # Windows: venv\Scripts\activate
+./setup.sh
 ```
 
-3. **Python 의존성 설치**
+3. **테스트 실행**
 ```bash
-# 전체 패키지 설치 (Python 3.8-3.12)
+./run_tests.sh
+```
+
+#### 수동 설치 (필요시)
+```bash
+# Python 가상환경 설정
+python3.12 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 의존성 설치
 pip install -r requirements.txt
-```
-
-4. **Playwright 브라우저 설치**
-```bash
 playwright install webkit
-```
 
-5. **Mock 서버 설치**
-```bash
+# Mock 서버 설치
 cd mock_server
 npm install
 cd ..
 ```
+</details>
 
 ## 🏃‍♂️ 테스트 실행
 
@@ -182,58 +205,46 @@ GitHub Actions를 통한 자동화된 테스트 실행:
    - GitHub Pages에 Allure Report 자동 배포
    - PR에 테스트 요약 코멘트
 
-🖥️ 프로젝트 클론
-### 1. **git**
+## 🐳 Docker로 테스트 실행 (권장)
+
+### 간단한 실행
 ```bash
-git clone https://github.com/jameshin1212/qa-automation-project
-cd qa-automation-project
+# 모든 테스트 실행
+docker-compose up qa-test
+
+# 테스트 종료
+docker-compose down
 ```
-🐳 Docker 테스트 실행 순서
 
-### 0. 🐳Docker 백그라운드 실행(mock server실행)
+### 테스트 타입별 실행
 ```bash
-docker-compose up -d mock-server 
-#```docker-compose down```(docker종료)
+# API 테스트만
+docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest tests/api -v"
+
+# UI 테스트만
+docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest tests/ui -v"
+
+# Smoke 테스트
+docker-compose run --rm qa-test bash -c "cd mock_server && npm start & sleep 5 && pytest -m smoke -v"
 ```
-### 1. API 테스트만
+
+### 리포트 및 정리
 ```bash
-docker-compose run --rm test-runner pytest tests/api -v
+# Allure 리포트 보기
+docker run -p 5050:5050 -v $(pwd)/allure-results:/app/allure-results frankescobar/allure-docker-service
+
+# 데이터 초기화
+./reset-db.sh
+
+# 리포트 초기화
+rm -rf allure-results allure-report reports
 ```
-### 2. UI 테스트만
-```bash
-docker-compose run --rm test-runner pytest tests/ui -v
-```
-### 3. 전체 테스트
-```bash
-docker-compose run --rm test-runner pytest -v
-```
-### 4. 리포트 확인
-```bash
-allure serve allure-results
-```
-### 5. 리포트 초기화
-```bash
-# 자동 스크립트 사용 (추천)
-./clean-reports.sh
-# 또는 수동 초기화
-rm -rf allure-results allure-report reports .pytest_cache
-mkdir -p allure-results allure-report reports
-```
-### 6. 데이터 초기화
-```bash
-# 자동 스크립트 사용
- ./reset-db.sh
- ```
 
 
 
 
 
-
-
-
-
-🤖 브라우저 GUI 자동화 테스트 실행 (로컬)
+## 🤖 브라우저 GUI 자동화 테스트 실행 (로컬)
 
 ### 0. Python 가상환경 설정
 ```bash

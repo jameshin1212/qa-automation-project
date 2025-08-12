@@ -87,4 +87,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/config || exit 1
 
 # 기본 실행 명령
-CMD ["bash", "-c", "cd mock_server && npm start & sleep 5 && pytest tests/api tests/ui --alluredir=allure-results -v"]
+CMD ["bash", "-c", "cd mock_server && npm start & sleep 5 && pytest -v"]

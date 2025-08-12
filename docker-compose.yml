@@ -1,70 +1,83 @@
+version: '3.8'
+
 services:
-  # Mock API Server
+  # 통합 테스트 환경 (Mock 서버 + 테스트 러너)
+  qa-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-qa-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_BASE_URL=http://localhost:3000
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+      - ./reports:/app/reports
+    ports:
+      - "3000:3000"  # Mock server port
+      - "5050:5050"  # Allure report port (optional)
+    command: >
+      bash -c "
+        echo '🚀 Starting WhaTap QA Automation Tests...' &&
+        cd mock_server && npm start &
+        echo '⏳ Waiting for mock server to be ready...' &&
+        sleep 5 &&
+        for i in {1..30}; do
+          curl -s http://localhost:3000/config > /dev/null 2>&1 && break || echo 'Waiting for server... ('$$i'/30)' && sleep 1;
+        done &&
+        echo '✅ Mock server is ready!' &&
+        echo '🧪 Running tests...' &&
+        pytest -v &&
+        echo '✅ Tests completed!' &&
+        if [ -d allure-results ] && [ \"$(ls -A allure-results)\" ]; then
+          echo '📊 Generating Allure report...' &&
+          allure generate allure-results -o allure-report --clean &&
+          echo '📊 Allure report generated at /app/allure-report';
+        fi &&
+        echo '🎉 All tasks completed successfully!'
+      "
+
+  # 개별 Mock 서버 (필요시 사용)
   mock-server:
     build:
       context: .
       dockerfile: Dockerfile.mock
     container_name: whatap-mock-server
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ./mock_server:/app
       - /app/node_modules
-      - ./mock_server/db-backup.json:/app/db-backup.json:ro
-    networks:
-      - qa-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/config', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/config"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    profiles:
+      - dev
 
-  # Test Runner
+  # 개별 테스트 러너 (필요시 사용)
   test-runner:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: whatap-test-runner
-    depends_on:
-      mock-server:
-        condition: service_healthy
     environment:
       - API_BASE_URL=http://mock-server:3000
       - PYTHONUNBUFFERED=1
-      - DISPLAY=:99
     volumes:
-      - ./tests:/app/tests
+      - ./tests:/app/tests:ro
       - ./allure-results:/app/allure-results
-      - ./allure-report:/app/allure-report
       - ./reports:/app/reports
-    networks:
-      - qa-network
-    command: >
-      bash -c "
-        pytest tests/api tests/ui --alluredir=allure-results -v &&
-        allure generate allure-results -o allure-report --clean
-      "
-
-  # Allure Report Server (선택사항)
-  allure-ui:
-    image: "frankescobar/allure-docker-service-ui:latest"
-    container_name: whatap-allure-ui
     depends_on:
-      - test-runner
-    ports:
-      - "5050:5050"
-    volumes:
-      - ./allure-results:/app/allure-results
-    networks:
-      - qa-network
+      mock-server:
+        condition: service_healthy
+    command: pytest -v
     profiles:
-      - with-report
+      - dev
 
 networks:
-  qa-network:
-    driver: bridge
-
-volumes:
-  allure-results:
-  allure-report:
+  default:
+    name: qa-network
