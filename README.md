@@ -67,7 +67,6 @@ qa-automation-project/
 
 ### ⚠️ Python 버전 호환성
 - **권장**: Python 3.12
-- **Python 3.13 사용자**: [PYTHON_COMPATIBILITY.md](./PYTHON_COMPATIBILITY.md) 참조
 
 1. **프로젝트 클론**
 ```bash
