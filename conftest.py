@@ -95,6 +95,22 @@ def reset_database():
     backup_path = MOCK_SERVER_DIR / "db-backup.json"
     db_path = MOCK_SERVER_DIR / "db.json"
     
+    # Create backup file if it doesn't exist
+    if not backup_path.exists():
+        print(f"Creating missing backup file: {backup_path}")
+        default_db = {
+            "users": [],
+            "config": {
+                "password_min_length": 8,
+                "password_max_length": 128,
+                "email_max_length": 255,
+                "allowed_domains": ["gmail.com", "naver.com", "test.com", "example.com"],
+                "password_regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+            }
+        }
+        with open(backup_path, 'w', encoding='utf-8') as f:
+            json.dump(default_db, f, indent=2)
+    
     # In Docker, these paths are also correct since we mount the entire app
     shutil.copy(backup_path, db_path)
     time.sleep(0.5)  # Wait for JSON Server to reload
