@@ -90,23 +90,32 @@ docker-compose up -d allure-serve
 
 UI 테스트가 실제 브라우저에서 어떻게 동작하는지 시각적으로 확인하려면:
 
+> ⚠️ **중요**: Python 3.13은 일부 의존성과 호환성 문제가 있을 수 있습니다. Python 3.10~3.12 사용을 권장합니다.
+
 ```bash
-# 1. Python 가상환경 설정
+# 1. Python 버전 확인 (3.10~3.12 권장)
+python3 --version
+
+# 2. Python 가상환경 설정
 python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 2. 의존성 설치
+# 3. 의존성 설치
 pip install -r requirements.txt
 
-# 3. Playwright 브라우저 설치
+# 만약 greenlet 설치 오류가 발생하면:
+# - Python 3.12 이하 버전 사용 권장
+# - 또는 Docker 환경 사용 (위의 Docker 실행 방법 참조)
+
+# 4. Playwright 브라우저 설치
 playwright install chromium
 
-# 4. Mock 서버 시작 (별도 터미널)
+# 5. Mock 서버 시작 (별도 터미널)
 cd mock_server
 npm install
 npm start
 
-# 5. UI 테스트를 브라우저 모드로 실행
+# 6. UI 테스트를 브라우저 모드로 실행
 pytest tests/ui/ --headed --slowmo=1000
 
 # 옵션 설명:
@@ -128,9 +137,35 @@ PWDEBUG=1 pytest tests/ui/ --headed
 
 | 모드 | 실행 방법 | 장점 | 용도 |
 |------|----------|------|------|
-| **Headless (Docker)** | `docker-compose run --rm ui-test` | 빠른 속도, CI/CD 적합 | 자동화 파이프라인 |
+| **Headless (Docker)** | `docker-compose run --rm ui-test` | 빠른 속도, CI/CD 적합, 환경 독립적 | 자동화 파이프라인 |
 | **Headed (로컬)** | `pytest tests/ui/ --headed` | 시각적 확인 가능 | 디버깅, 데모 |
 | **Debug (로컬)** | `PWDEBUG=1 pytest tests/ui/ --headed` | 단계별 실행 | 문제 해결 |
+
+### 🔧 트러블슈팅
+
+#### Python 버전 호환성 문제
+만약 `greenlet` 설치 오류가 발생하면:
+
+1. **Python 3.12 사용 (권장)**:
+   ```bash
+   # macOS (Homebrew)
+   brew install python@3.12
+   python3.12 -m venv venv
+   
+   # Ubuntu/Debian
+   sudo apt install python3.12 python3.12-venv
+   python3.12 -m venv venv
+   ```
+
+2. **Docker 환경 사용 (가장 안정적)**:
+   ```bash
+   docker-compose run --rm all-test
+   ```
+
+3. **requirements-minimal.txt 사용**:
+   ```bash
+   pip install -r requirements-minimal.txt
+   ```
 
 
 
