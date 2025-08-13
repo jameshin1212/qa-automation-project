@@ -71,7 +71,9 @@ qa-automation-project/
 ```
 ## 📝 실행 방법
 
-### 🚀 Docker 환경에서 실행 (Headless Mode)
+### 🚀 Docker 환경에서 실행
+
+#### 정상 테스트 실행 (모든 테스트 통과 예상)
 
 ```bash
 # 1. 프로젝트 클론
@@ -82,13 +84,28 @@ cd qa-automation-project
 docker-compose build
 docker-compose up -d qa-server
 
-# 3. 테스트 실행 (Headless 모드)
+# 3. 전체 테스트 실행 (31개)
 docker-compose run --rm all-test
 
 # 4. Allure Report 생성 및 확인
 docker-compose run allure-generate
 docker-compose up -d allure-serve
 # 브라우저에서 http://localhost:9090 접속
+```
+
+#### 🐛 버그 감지 테스트 실행 (4개 버그 발견 예상)
+
+```bash
+# 1. Mock Server 시작 (버그 모드 활성화)
+docker-compose up -d qa-server
+
+# 2. 버그 감지 테스트 실행 (4개 버그 감지)
+docker-compose run --rm bug-test
+
+# 3. 테스트 리포트 확인
+cat TEST_REPORT_WITH_BUGS.md
+
+# 결과: 87.1% 성공률 (27/31 통과, 4개 버그 발견)
 ```
 
 ### 🖥️ 브라우저에서 UI 테스트 직접 확인하기 (Headed Mode)
@@ -201,13 +218,52 @@ npm start --prefix mock_server
 
 ### 버그 감지 테스트 실행
 
+#### 🐳 Docker 환경에서 실행 (권장)
+
 ```bash
-# 버그 감지 테스트만 실행
+# 1. Mock Server 시작 (버그 모드 활성화)
+docker-compose up -d qa-server
+
+# 2. 버그 감지 테스트 실행 및 리포트 생성
+docker-compose run --rm bug-test
+
+# 3. 생성된 리포트 확인
+cat TEST_REPORT_WITH_BUGS.md
+
+# 4. Allure Report 생성 및 확인 (선택사항)
+docker-compose run allure-generate
+docker-compose up -d allure-serve
+# 브라우저에서 http://localhost:9090 접속
+
+# 5. 테스트 완료 후 정리
+docker-compose down
+```
+
+#### 💻 로컬 환경에서 실행
+
+```bash
+# 1. Mock Server 시작 (별도 터미널)
+npm start --prefix mock_server
+
+# 2. 버그 감지 테스트만 실행
 pytest tests/api/test_bug_detection.py -v
 
-# 테스트 리포트 생성
+# 3. 테스트 리포트 생성
 python generate_test_report.py
+
+# 4. 리포트 확인
+cat TEST_REPORT_WITH_BUGS.md
 ```
+
+#### 📋 Docker 명령어 요약
+
+| 목적 | 명령어 | 설명 |
+|------|--------|------|
+| 전체 테스트 (정상) | `docker-compose run --rm all-test` | 31개 전체 테스트 실행 |
+| API 테스트만 | `docker-compose run --rm api-test` | 25개 API 테스트만 실행 |
+| UI 테스트만 | `docker-compose run --rm ui-test` | 6개 UI 테스트만 실행 |
+| **버그 감지 테스트** | `docker-compose run --rm bug-test` | **4개 버그 감지 + 리포트 생성** |
+| 리포트 서버 | `docker-compose up -d allure-serve` | http://localhost:9090 |
 
 ### 교육적 목적
 

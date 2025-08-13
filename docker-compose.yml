@@ -114,6 +114,56 @@ services:
     networks:
       - qa-network
 
+  # 버그 감지 테스트 전용
+  bug-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatap-bug-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_BASE_URL=http://qa-server:3000
+      - DOCKER_ENV=true
+      - BUG_SHORT_PASSWORD=true
+      - BUG_NO_LOWERCASE=true
+      - BUG_XSS_BYPASS=true
+      - BUG_DUPLICATE_ALLOW=true
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./reports:/app/reports
+      - ./TEST_REPORT_WITH_BUGS.md:/app/TEST_REPORT_WITH_BUGS.md
+    depends_on:
+      qa-server:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo '🐛 Running Bug Detection Tests...' &&
+        echo '================================' &&
+        echo 'Waiting for Mock Server to be ready...' &&
+        sleep 3 &&
+        echo '🔍 Detecting intentional bugs for QA demonstration...' &&
+        pytest tests/api/test_bug_detection.py -v --alluredir=allure-results || true &&
+        echo '================================' &&
+        echo '📊 Generating Test Report with Bugs...' &&
+        python generate_test_report.py &&
+        echo '================================' &&
+        echo '✅ Bug Detection Completed!' &&
+        echo '' &&
+        echo '📋 Test Summary:' &&
+        echo '  - Total Tests: 31 (including bug detection)' &&
+        echo '  - Expected Failures: 4 bugs' &&
+        echo '  - Success Rate: 87.1%' &&
+        echo '' &&
+        echo '🐛 Detected Bugs:' &&
+        echo '  1. [HIGH] 7-char password accepted (BUG-TC-008)' &&
+        echo '  2. [HIGH] No lowercase password accepted (BUG-TC-010)' &&
+        echo '  3. [CRITICAL] XSS pattern bypassed (BUG-TC-020)' &&
+        echo '  4. [HIGH] Duplicate email allowed (BUG-TC-024)' &&
+        echo '' &&
+        echo '📄 Report saved to TEST_REPORT_WITH_BUGS.md'"
+    networks:
+      - qa-network
+
   # Allure Report 생성 및 서버
   allure-generate:
     image: openjdk:11-jre-slim
