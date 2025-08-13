@@ -64,23 +64,73 @@ qa-automation-project/
 ├── run_tests.sh                # 테스트 실행 배치 스크립트
 └── README.md                   # 프로젝트 가이드 문서
 ```
-  📝 실행 방법
+## 📝 실행 방법
 
-  # 1. 프로젝트 클론
-  git clone https://github.com/jameshin1212/qa-automation-project
-  cd qa-automation-project
+### 🚀 Docker 환경에서 실행 (Headless Mode)
 
-  # 2. Docker 빌드 및 서버 시작
-  docker-compose build
-  docker-compose up -d qa-server
+```bash
+# 1. 프로젝트 클론
+git clone https://github.com/jameshin1212/qa-automation-project
+cd qa-automation-project
 
-  # 3. 테스트 실행
-  docker-compose run --rm all-test
+# 2. Docker 빌드 및 서버 시작
+docker-compose build
+docker-compose up -d qa-server
 
-  # 4. Allure Report 생성 및 확인
-  docker-compose run allure-generate
-  docker-compose up -d allure-serve
-  # 브라우저에서 http://localhost:9090 접속
+# 3. 테스트 실행 (Headless 모드)
+docker-compose run --rm all-test
+
+# 4. Allure Report 생성 및 확인
+docker-compose run allure-generate
+docker-compose up -d allure-serve
+# 브라우저에서 http://localhost:9090 접속
+```
+
+### 🖥️ 브라우저에서 UI 테스트 직접 확인하기 (Headed Mode)
+
+UI 테스트가 실제 브라우저에서 어떻게 동작하는지 시각적으로 확인하려면:
+
+```bash
+# 1. Python 가상환경 설정
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 2. 의존성 설치
+pip install -r requirements.txt
+
+# 3. Playwright 브라우저 설치
+playwright install chromium
+
+# 4. Mock 서버 시작 (별도 터미널)
+cd mock_server
+npm install
+npm start
+
+# 5. UI 테스트를 브라우저 모드로 실행
+pytest tests/ui/ --headed --slowmo=1000
+
+# 옵션 설명:
+# --headed: 실제 브라우저 창을 열어서 테스트 진행
+# --slowmo=1000: 각 동작 사이에 1초 대기 (동작을 천천히 확인)
+```
+
+#### 🎯 개별 UI 테스트 실행 예시
+
+```bash
+# 특정 테스트만 브라우저에서 확인
+pytest tests/ui/test_registration_ui.py::TestRegistrationUI::test_successful_registration --headed --slowmo=500
+
+# 디버그 모드로 실행 (더 자세한 로그)
+PWDEBUG=1 pytest tests/ui/ --headed
+```
+
+### 📋 테스트 모드 비교
+
+| 모드 | 실행 방법 | 장점 | 용도 |
+|------|----------|------|------|
+| **Headless (Docker)** | `docker-compose run --rm ui-test` | 빠른 속도, CI/CD 적합 | 자동화 파이프라인 |
+| **Headed (로컬)** | `pytest tests/ui/ --headed` | 시각적 확인 가능 | 디버깅, 데모 |
+| **Debug (로컬)** | `PWDEBUG=1 pytest tests/ui/ --headed` | 단계별 실행 | 문제 해결 |
 
 
 
