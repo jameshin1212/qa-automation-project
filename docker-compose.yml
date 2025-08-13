@@ -16,7 +16,10 @@ services:
     command: >
       bash -c "
         echo '🚀 Starting Mock Server...' &&
-        cd mock_server && npm start"
+        cd mock_server &&
+        cp db-backup.json db.json &&
+        echo '📦 Database initialized from backup' &&
+        npm start"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/config"]
       interval: 5s
