@@ -30,8 +30,6 @@ yarn-error.log*
 
 # Database
 mock_server/db.json
-mock_server/db-*.json
-\!mock_server/db-backup.json
 mock_server/.port
 
 # Logs

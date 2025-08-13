@@ -63,211 +63,23 @@ qa-automation-project/
 ├── run_tests.sh                # 테스트 실행 배치 스크립트
 └── README.md                   # 프로젝트 가이드 문서
 ```
+  📝 실행 방법
 
-## 🚀 빠른 시작 (권장)
+  # 1. 프로젝트 클론
+  git clone https://github.com/jameshin1212/qa-automation-project
+  cd qa-automation-project
 
-### 🐳 방법 1: Docker 사용 (가장 간단 - 환경 독립적)
-```bash
-# 1. 프로젝트 클론
-git clone https://github.com/jameshin1212/qa-automation-project
-cd qa-automation-project
+  # 2. Docker 빌드 및 서버 시작
+  docker-compose build
+  docker-compose up -d qa-server
 
-# 2. Docker로 테스트 실행
-docker-compose up qa-test
+  # 3. 테스트 실행
+  docker-compose run --rm all-test
 
-# 완료! 모든 테스트가 자동으로 실행됩니다.
-```
-
-📖 자세한 Docker 사용법: [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md)
-
-### 💻 방법 2: 로컬 환경 설정
-<details>
-<summary>로컬 설치 방법 보기</summary>
-
-#### Python 버전 요구사항
-- **권장**: Python 3.12
-- **지원**: Python 3.8 ~ 3.12
-
-#### 설치 단계
-1. **프로젝트 클론**
-```bash
-git clone https://github.com/jameshin1212/qa-automation-project
-cd qa-automation-project
-```
-
-2. **자동 설정 스크립트 실행**
-```bash
-./setup.sh
-```
-
-3. **테스트 실행**
-```bash
-./run_tests.sh
-```
-
-#### 수동 설치 (필요시)
-```bash
-# Python 가상환경 설정
-python3.12 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 의존성 설치
-pip install -r requirements.txt
-playwright install webkit
-
-# Mock 서버 설치
-cd mock_server
-npm install
-cd ..
-```
-</details>
-
-## 🏃‍♂️ 테스트 실행
-
-### 1️⃣ Mock 서버 시작
-```bash
-cd mock_server
-npm start
-# 서버가 http://localhost:3000 에서 실행됩니다
-```
-
-### 2️⃣ 테스트 실행
-새 터미널에서:
-```bash
-pytest -v
-```
-
-### 3️⃣ 특정 테스트 실행
-
-**API 테스트만:**
-```bash
-pytest tests/api -v
-```
-
-**UI 테스트만:**
-```bash
-# 기본 (headless 모드)
-pytest tests/ui -v
-
-# 브라우저 화면 표시 모드 (테스트 동작 확인)
-pytest tests/ui -v --headed
-
-# 느린 모션으로 동작 관찰
-pytest tests/ui -v --headed --slowmo=2000
-```
-
-**Smoke 테스트:** ##
-```bash
-pytest -m smoke -v # 핵심 기능 테스트
-```
-
-**특정 카테고리:**
-```bash
-pytest -m security -v  # 보안 테스트
-pytest -m boundary -v  # 경계값 테스트
-pytest -m negative -v  # 네거티브 테스트
-```
-
-### 5️⃣ Allure Report 생성
-
-#### 수동 실행
-```bash
-# Allure 데이터 생성하면서 테스트 실행
-pytest tests/api -v --alluredir=allure-results
-
-# 브라우저에서 리포트 보기
-allure serve allure-results
-
-# 또는 HTML 파일로 생성
-allure generate allure-results -o allure-report --clean
-open allure-report/index.html
-```
-
-
-## 🔄 CI/CD 파이프라인
-
-GitHub Actions를 통한 자동화된 테스트 실행:
-
-1. **트리거 조건**
-   - `main`, `develop` 브랜치 푸시
-   - Pull Request 생성
-   - 수동 실행 (workflow_dispatch)
-
-2. **실행 단계**
-   - 환경 설정 (Python, Node.js)
-   - 의존성 설치
-   - Mock 서버 시작
-   - 테스트 실행
-   - Allure Report 생성
-   - 결과 아티팩트 업로드
-
-3. **테스트 결과**
-   - GitHub Pages에 Allure Report 자동 배포
-   - PR에 테스트 요약 코멘트
-
-## 🐳 Docker로 테스트 실행 (권장)
-
-### 📖 단계별 실행 가이드
-채용 담당자님을 위한 명확한 실행 가이드: **[DOCKER_STEP_BY_STEP.md](DOCKER_STEP_BY_STEP.md)**
-
-### 🚀 빠른 실행 (5단계)
-```bash
-# 1. Docker 빌드
-docker-compose build
-
-# 2. Mock 서버 시작
-docker-compose up -d qa-server
-
-# 3. API 테스트 (25개)
-docker-compose run --rm api-test
-
-# 4. UI 테스트 (6개)
-docker-compose run --rm ui-test
-
-# 5. Allure Report 확인
-docker-compose up -d allure-report
-# 브라우저: http://localhost:5050
-```
-
-### 📊 예상 결과
-- **API 테스트**: 25개 통과 ✅
-- **UI 테스트**: 6개 통과 ✅
-- **총 31개 테스트**: 100% 성공률
-
-### 🧹 정리
-```bash
-# 모든 서비스 중지
-docker-compose down
-
-# 결과 초기화 (선택사항)
-rm -rf allure-results allure-report
-```
-
-
-
-
-
-## 🤖 브라우저 GUI 자동화 테스트 실행 (로컬)
-
-### 0. Python 가상환경 설정
-```bash
-python3 -m venv venv
-source venv/bin/activate 
-#```deactivate```(가상환경 종료)
-```
-### 1. mock_server 실행 (새로운 터미널 창)
-```bash
-cd mock_server
-npm start
-#```  kill -9 $(lsof -t -i:3000)```(mock_server종료)
-```
-### 2. 브라우저 GUI 테스트 
-```bash
-# 브라우저 화면 표시 모드 (테스트 동작 확인)
-pytest tests/ui -v --headed
-# 느린 모션으로 동작 관찰
-pytest tests/ui -v --headed --slowmo=2000
-``` 
+  # 4. Allure Report 생성 및 확인
+  docker-compose run allure-generate
+  docker-compose up -d allure-serve
+  # 브라우저에서 http://localhost:9090 접속
 
 
 
