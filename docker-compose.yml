@@ -114,22 +114,34 @@ services:
     networks:
       - qa-network
 
-  # Allure Report 서버
-  allure-report:
-    image: frankescobar/allure-docker-service:latest
-    container_name: whatap-allure-report
-    ports:
-      - "5050:5050"
-      - "4040:4040"
+  # Allure Report 생성 및 서버
+  allure-generate:
+    image: openjdk:11-jre-slim
+    container_name: whatap-allure-generate
     volumes:
-      - ./allure-results:/app/allure-results
-      - ./allure-results:/app/projects/default/results
-      - ./allure-report:/app/default-reports
-    environment:
-      CHECK_RESULTS_EVERY_SECONDS: 5
-      KEEP_HISTORY: "TRUE"
-      ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:5050"
-      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
+      - ./allure-results:/allure-results
+      - ./allure-report:/allure-report
+    command: >
+      bash -c "
+        apt-get update && apt-get install -y wget unzip &&
+        wget -q https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.zip &&
+        unzip -q allure-2.27.0.zip &&
+        ./allure-2.27.0/bin/allure generate /allure-results -o /allure-report --clean &&
+        echo 'Report generated successfully'"
+    networks:
+      - qa-network
+
+  # Allure Report 서버 (nginx)
+  allure-serve:
+    image: nginx:alpine
+    container_name: whatap-allure-serve
+    ports:
+      - "8080:80"
+    volumes:
+      - ./allure-report:/usr/share/nginx/html:ro
+    depends_on:
+      allure-generate:
+        condition: service_completed_successfully
     networks:
       - qa-network
 
