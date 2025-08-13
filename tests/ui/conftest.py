@@ -3,7 +3,13 @@ UI test configuration and fixtures
 """
 import pytest
 from playwright.sync_api import Page, Browser, Playwright
-import allure
+
+# Allure를 옵셔널하게 import
+try:
+    import allure
+    ALLURE_AVAILABLE = True
+except ImportError:
+    ALLURE_AVAILABLE = False
 
 @pytest.fixture(scope="session")
 def browser_context_args():
@@ -26,11 +32,12 @@ def screenshot_on_failure(request, page: Page):
     
     if request.node.rep_call.failed:
         screenshot = page.screenshot()
-        allure.attach(
-            screenshot,
-            name=f"failure_{request.node.name}",
-            attachment_type=allure.attachment_type.PNG
-        )
+        if ALLURE_AVAILABLE:
+            allure.attach(
+                screenshot,
+                name=f"failure_{request.node.name}",
+                attachment_type=allure.attachment_type.PNG
+            )
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):

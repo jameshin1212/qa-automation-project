@@ -93,8 +93,8 @@ UI 테스트가 실제 브라우저에서 어떻게 동작하는지 시각적으
 > ⚠️ **중요**: Python 3.13은 일부 의존성과 호환성 문제가 있을 수 있습니다. Python 3.10~3.12 사용을 권장합니다.
 
 ```bash
-# 1. Python 버전 확인 (3.10~3.12 권장)
-python3 --version
+# 1. Python 버전 확인 (3.12 권장)
+python3.12 --version
 
 # 2. Python 가상환경 설정
 python3 -m venv venv
@@ -106,6 +106,9 @@ pip install -r requirements.txt
 # 만약 greenlet 설치 오류가 발생하면:
 # - Python 3.12 이하 버전 사용 권장
 # - 또는 Docker 환경 사용 (위의 Docker 실행 방법 참조)
+
+# allure 모듈 오류가 발생하면:
+pip install allure-pytest
 
 # 4. Playwright 브라우저 설치
 playwright install chromium
