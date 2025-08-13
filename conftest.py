@@ -39,6 +39,13 @@ def setup_test_environment():
     # Create reports directory if not exists
     REPORTS_DIR.mkdir(exist_ok=True)
     
+    # Skip server startup if explicitly requested (Docker environment)
+    if os.getenv('SKIP_SERVER_STARTUP') == 'true':
+        print("Skipping server startup (Docker environment)")
+        yield
+        print("\n=== Test environment cleanup (Docker) ===")
+        return
+    
     # Check if we're in Docker environment or server is already running
     server_already_running = False
     try:

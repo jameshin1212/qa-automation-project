@@ -9,6 +9,10 @@ services:
     container_name: whatap-qa-server
     environment:
       - PYTHONUNBUFFERED=1
+      - BUG_SHORT_PASSWORD=${BUG_SHORT_PASSWORD:-false}
+      - BUG_NO_LOWERCASE=${BUG_NO_LOWERCASE:-false}
+      - BUG_XSS_BYPASS=${BUG_XSS_BYPASS:-false}
+      - BUG_DUPLICATE_ALLOW=${BUG_DUPLICATE_ALLOW:-false}
     ports:
       - "3000:3000"  # Mock server port
     networks:
@@ -124,6 +128,7 @@ services:
       - PYTHONUNBUFFERED=1
       - API_BASE_URL=http://qa-server:3000
       - DOCKER_ENV=true
+      - SKIP_SERVER_STARTUP=true
       - BUG_SHORT_PASSWORD=true
       - BUG_NO_LOWERCASE=true
       - BUG_XSS_BYPASS=true
@@ -142,7 +147,7 @@ services:
         echo 'Waiting for Mock Server to be ready...' &&
         sleep 3 &&
         echo '🔍 Detecting intentional bugs for QA demonstration...' &&
-        pytest tests/api/test_bug_detection.py -v --alluredir=allure-results || true &&
+        python run_bug_tests.py || true &&
         echo '================================' &&
         echo '📊 Generating Test Report with Bugs...' &&
         python generate_test_report.py &&
