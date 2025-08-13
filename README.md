@@ -51,7 +51,8 @@ qa-automation-project/
 │   ├── generate_test_cases.py   # Excel 문서 생성 스크립트
 │   └── generate_test_cases_simple.py  # 간소화된 Excel 생성기
 ├── reports/                      # 테스트 실행 결과
-│   └── debug_db_*.json          # 실패한 테스트의 DB 상태 스냅샷
+│   ├── QA_api_ui_automation_report.pdf  # 전체 테스트 결과 PDF (31개 테스트 100% 통과)
+│   └── README.md                # 리포트 설명 문서
 ├── .github/workflows/            # GitHub Actions CI/CD
 │   └── test-automation.yml      # 자동화된 테스트 파이프라인
 ├── allure-results/              # Allure 리포트 원시 데이터

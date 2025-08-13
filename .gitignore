@@ -19,7 +19,8 @@ htmlcov/
 .coverage.*
 allure-results/
 allure-report/
-reports/
+# reports/ 폴더는 PDF 결과를 포함하므로 추적
+# reports/
 
 # Node.js
 node_modules/
