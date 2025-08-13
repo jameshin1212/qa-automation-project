@@ -136,7 +136,7 @@ services:
     image: nginx:alpine
     container_name: whatap-allure-serve
     ports:
-      - "8080:80"
+      - "9090:80"
     volumes:
       - ./allure-report:/usr/share/nginx/html:ro
     depends_on:
