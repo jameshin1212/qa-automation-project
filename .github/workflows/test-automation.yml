@@ -116,11 +116,17 @@ jobs:
       if: github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
       run: |
         mkdir -p reports
-        pytest tests/api -v --alluredir=allure-results --html=reports/api_report.html --self-contained-html || true
-        # Check if any tests actually failed (not just warnings)
-        if [ -f allure-results/*.json ]; then
-          echo "API tests completed"
-        fi
+        # Run regular API tests
+        pytest tests/api -v --ignore=tests/api/test_bug_detection.py --alluredir=allure-results --html=reports/api_report.html --self-contained-html || true
+        
+        # Run bug detection tests separately (expected to fail)
+        echo "Running bug detection tests (failures expected)..."
+        pytest tests/api/test_bug_detection.py -v --alluredir=allure-results --html=reports/bug_detection_report.html --self-contained-html || true
+        
+        # Generate test report with bugs
+        python generate_test_report.py || true
+        
+        echo "API tests completed (including bug detection)"
     
     - name: Run UI Tests
       if: github.event.inputs.test_type == 'ui' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''

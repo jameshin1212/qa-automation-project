@@ -142,3 +142,20 @@ class BaseAPITest:
         import re
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return bool(re.match(pattern, email.strip()))
+    
+    def validate_timestamp(self, timestamp: str) -> bool:
+        """
+        Validate ISO 8601 timestamp format
+        
+        Args:
+            timestamp: Timestamp string to validate
+            
+        Returns:
+            True if valid ISO timestamp, False otherwise
+        """
+        try:
+            from datetime import datetime
+            datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            return True
+        except:
+            return False

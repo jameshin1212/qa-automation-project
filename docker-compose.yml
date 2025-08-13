@@ -9,6 +9,10 @@ services:
     container_name: whatap-qa-server
     environment:
       - PYTHONUNBUFFERED=1
+      - BUG_SHORT_PASSWORD=${BUG_SHORT_PASSWORD:-true}
+      - BUG_NO_LOWERCASE=${BUG_NO_LOWERCASE:-true}
+      - BUG_XSS_BYPASS=${BUG_XSS_BYPASS:-true}
+      - BUG_DUPLICATE_ALLOW=${BUG_DUPLICATE_ALLOW:-true}
     ports:
       - "3000:3000"  # Mock server port
     networks:
@@ -113,6 +117,7 @@ services:
         echo 'Total: 31 test cases (25 API + 6 UI) executed'"
     networks:
       - qa-network
+
 
   # Allure Report 생성 및 서버
   allure-generate:

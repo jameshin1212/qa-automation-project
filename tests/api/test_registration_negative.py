@@ -3,6 +3,7 @@ Negative test scenarios for user registration API
 """
 import pytest
 import allure
+import json
 from base_api_test import BaseAPITest
 
 @allure.feature("User Registration")
@@ -71,11 +72,22 @@ class TestRegistrationNegative(BaseAPITest):
     @pytest.mark.negative
     def test_registration_password_too_short_fail(self):
         """Test registration fails with password too short"""
-        test_case = self.test_data["negative_cases"][3]
+        import uuid
         
-        validations = self.validate_password_complexity(test_case["password"])
-        assert not validations["min_length"], "Short password should fail validation"
-        assert not validations["is_valid"], "Password should be invalid"
+        # Test with 7-character password
+        email = f"shortpass_{uuid.uuid4().hex[:8]}@test.com"
+        password = "Test12!"  # Exactly 7 characters
+        
+        result = self.register_user(
+            email=email,
+            password=password,
+            expected_status=400
+        )
+        
+        # Should get error for short password
+        error_data = result.json()
+        assert error_data.get("code") == "INVALID_PASSWORD", \
+            f"Expected INVALID_PASSWORD error, got {error_data}"
     
     @allure.title("TC-009: 비밀번호에 대문자 누락")
     @allure.testcase("TC-009")
@@ -97,11 +109,22 @@ class TestRegistrationNegative(BaseAPITest):
     @pytest.mark.negative
     def test_registration_password_missing_lowercase_fail(self):
         """Test registration fails with password missing lowercase"""
-        test_case = self.test_data["negative_cases"][5]
+        import uuid
         
-        validations = self.validate_password_complexity(test_case["password"])
-        assert not validations["has_lowercase"], "Password should lack lowercase"
-        assert not validations["is_valid"], "Password should be invalid"
+        # Test with password without lowercase
+        email = f"nolower_{uuid.uuid4().hex[:8]}@test.com"
+        password = "NOLOWERCASE123!"  # No lowercase letters
+        
+        result = self.register_user(
+            email=email,
+            password=password,
+            expected_status=400
+        )
+        
+        # Should get error for weak password
+        error_data = result.json()
+        assert error_data.get("code") == "WEAK_PASSWORD", \
+            f"Expected WEAK_PASSWORD error, got {error_data}"
     
     @allure.title("TC-011: 빈 이메일 필드")
     @allure.testcase("TC-011")

@@ -19,10 +19,18 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 
 # API configuration
 # Docker 환경에서는 qa-server:3000 사용
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-if "qa-server" in API_BASE_URL:
-    # Docker 환경: 명시적으로 qa-server 사용
+# Docker environment check
+if os.getenv("DOCKER_ENV") == "true" or os.getenv("SKIP_SERVER_STARTUP") == "true":
     API_BASE_URL = "http://qa-server:3000"
+else:
+    # Local environment
+    port_file = MOCK_SERVER_DIR / ".port"
+    if port_file.exists():
+        with open(port_file, 'r') as f:
+            port = f.read().strip()
+            API_BASE_URL = f"http://localhost:{port}"
+    else:
+        API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
@@ -31,6 +39,13 @@ def setup_test_environment():
     
     # Create reports directory if not exists
     REPORTS_DIR.mkdir(exist_ok=True)
+    
+    # Skip server startup if explicitly requested (Docker environment)
+    if os.getenv('SKIP_SERVER_STARTUP') == 'true':
+        print("Skipping server startup (Docker environment)")
+        yield
+        print("\n=== Test environment cleanup (Docker) ===")
+        return
     
     # Check if we're in Docker environment or server is already running
     server_already_running = False
