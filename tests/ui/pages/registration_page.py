@@ -2,7 +2,18 @@
 Page Object Model for Registration Page
 """
 from playwright.sync_api import Page, expect
-import allure
+
+# Allure를 옵셔널하게 import
+try:
+    import allure
+    ALLURE_AVAILABLE = True
+except ImportError:
+    ALLURE_AVAILABLE = False
+    # allure가 없을 때를 위한 더미 데코레이터
+    class allure:
+        @staticmethod
+        def step(name):
+            return lambda x: x
 
 class RegistrationPage:
     """Page Object for the registration form"""

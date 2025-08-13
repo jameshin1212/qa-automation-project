@@ -2,9 +2,35 @@
 UI test scenarios for user registration
 """
 import pytest
-import allure
 from playwright.sync_api import Page, expect
 import time
+
+# Allure를 옵셔널하게 import
+try:
+    import allure
+    ALLURE_AVAILABLE = True
+except ImportError:
+    ALLURE_AVAILABLE = False
+    # allure가 없을 때를 위한 더미 데코레이터
+    class allure:
+        @staticmethod
+        def feature(name):
+            return lambda x: x
+        @staticmethod
+        def story(name):
+            return lambda x: x
+        @staticmethod
+        def title(name):
+            return lambda x: x
+        @staticmethod
+        def testcase(name):
+            return lambda x: x
+        @staticmethod
+        def severity(level):
+            return lambda x: x
+        @staticmethod
+        def step(name):
+            return lambda x: x
 
 @allure.feature("User Registration UI")
 @allure.story("UI Testing")
