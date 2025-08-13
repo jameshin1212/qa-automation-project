@@ -126,13 +126,15 @@ jobs:
           allure-report/
         retention-days: 30
     
-    - name: Upload Allure Report to GitHub Pages
-      if: always() && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./allure-report
-        publish_branch: gh-pages
+    # GitHub Pages deployment is optional - requires repository settings configuration
+    # Uncomment below lines after enabling GitHub Pages in repository settings
+    # - name: Upload Allure Report to GitHub Pages
+    #   if: always() && github.ref == 'refs/heads/main'
+    #   uses: peaceiris/actions-gh-pages@v4
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: ./allure-report
+    #     publish_branch: gh-pages
     
     - name: Test Summary
       if: always()
