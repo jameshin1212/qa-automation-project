@@ -93,12 +93,94 @@ docker-compose up -d allure-serve
 
 ### 🖥️ 브라우저에서 UI 테스트 직접 확인하기 (Headed Mode)
 
-  # 1. Docker로 실행
-  docker-compose up -d qa-server
+```bash
+# 1. Docker로 실행
+docker-compose up -d qa-server
 
-  # 2. 로컬에서 UI 테스트 실행
-  npm install --prefix mock_server
-  pytest tests/ui/ --headed --slowmo=1000
+# 2. 로컬에서 UI 테스트 실행
+npm install --prefix mock_server
+pytest tests/ui/ --headed --slowmo=1000
+```
+
+## 🔄 CI/CD 실행 방법 (GitHub Actions)
+
+### 📋 자동 실행 (Push/PR 시)
+
+GitHub Actions는 다음 이벤트 발생 시 자동으로 실행됩니다:
+
+- **Push**: `main` 또는 `develop` 브랜치에 코드 Push 시
+- **Pull Request**: `main` 브랜치로 PR 생성 시
+
+### 🎯 수동 실행 (Workflow Dispatch)
+
+GitHub 리포지토리에서 직접 워크플로우를 실행할 수 있습니다:
+
+1. **GitHub 리포지토리 접속**
+   - https://github.com/[your-username]/qa-automation-project
+
+2. **Actions 탭 클릭**
+   - 상단 메뉴에서 `Actions` 탭 선택
+
+3. **워크플로우 선택**
+   - 왼쪽 사이드바에서 `QA Automation Tests` 워크플로우 선택
+
+4. **Run workflow 클릭**
+   - 오른쪽 상단의 `Run workflow` 버튼 클릭
+   - 테스트 타입 선택:
+     - `all`: 모든 테스트 실행 (기본값)
+     - `api`: API 테스트만 실행
+     - `ui`: UI 테스트만 실행
+     - `smoke`: Smoke 테스트만 실행
+
+5. **실행 및 결과 확인**
+   - `Run workflow` 버튼 클릭하여 실행
+   - 실행 중인 워크플로우 클릭하여 실시간 로그 확인
+   - 완료 후 `Artifacts` 섹션에서 테스트 결과 다운로드 가능
+
+### 📊 테스트 결과 확인
+
+CI/CD 실행 후 결과를 확인하는 방법:
+
+1. **실행 요약 (Summary)**
+   - 각 워크플로우 실행 페이지 하단에 테스트 요약 표시
+   - API/UI 테스트 완료 상태 확인
+
+2. **아티팩트 다운로드 (Artifacts)**
+   - `test-results` 아티팩트 다운로드
+   - 포함 내용:
+     - `reports/`: HTML 테스트 리포트
+     - `allure-report/`: Allure 대화형 리포트
+
+3. **실패 시 디버깅**
+   - 워크플로우 로그에서 실패한 테스트 상세 정보 확인
+   - Mock Server 시작 실패 시 서버 로그 확인
+   - Playwright 브라우저 설치 오류 시 의존성 확인
+
+### ⚙️ GitHub Actions 워크플로우 구성
+
+워크플로우 파일: `.github/workflows/test-automation.yml`
+
+**주요 단계:**
+1. 코드 체크아웃
+2. Python 3.12 & Node.js 18 설정
+3. 의존성 캐싱 (빠른 실행을 위함)
+4. Python/Node 패키지 설치
+5. Playwright 브라우저 설치
+6. Mock Server 준비 및 시작
+7. 테스트 실행 (API/UI/Smoke)
+8. Allure Report 생성
+9. 결과 아티팩트 업로드
+
+### 🔧 CI/CD 문제 해결
+
+**일반적인 문제와 해결 방법:**
+
+| 문제 | 원인 | 해결 방법 |
+|------|------|-----------|
+| Mock Server 시작 실패 | 포트 충돌 또는 db.json 누락 | db-backup.json 자동 생성 로직 확인 |
+| Playwright 설치 실패 | Ubuntu 패키지 의존성 | 워크플로우에 수동 의존성 설치 포함됨 |
+| 테스트 타임아웃 | Mock Server 응답 지연 | 서버 준비 대기 시간 증가 |
+| 아티팩트 업로드 실패 | 권한 문제 | GitHub 리포지토리 Actions 권한 확인 |
 
 
 
