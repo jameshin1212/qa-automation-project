@@ -59,19 +59,37 @@ jobs:
     
     - name: Install Playwright browsers
       run: |
-        playwright install chromium
-        playwright install-deps chromium
+        playwright install --with-deps chromium
     
     - name: Install JSON Server
       run: |
         cd mock_server
         npm ci
     
+    - name: Prepare Mock Server Database
+      run: |
+        cd mock_server
+        # Create db-backup.json if it doesn't exist
+        if [ ! -f db-backup.json ]; then
+          echo '{"users": [], "config": {"password_min_length": 8, "password_max_length": 128, "email_max_length": 255, "allowed_domains": ["gmail.com", "naver.com", "test.com", "example.com"], "password_regex": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"}}' > db-backup.json
+        fi
+        # Copy backup to db.json
+        cp db-backup.json db.json
+    
     - name: Start Mock Server
       run: |
         cd mock_server
         npm start &
         sleep 5
+        # Wait for server to be ready
+        for i in {1..10}; do
+          if curl -f http://localhost:3000/config 2>/dev/null; then
+            echo "Mock server is ready!"
+            break
+          fi
+          echo "Waiting for mock server... ($i/10)"
+          sleep 2
+        done
         curl -f http://localhost:3000/config || exit 1
     
     - name: Run API Tests
