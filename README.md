@@ -25,6 +25,7 @@ QA지원자 신동혁 입니다. 해당 프로젝트는 웹 애플리케이션�
 ```
 qa-automation-project/
 ├── mock_server/                    # JSON Server Mock API 서버
+│   ├── middleware.js              # API 검증 및 버그 시뮬레이션 미들웨어
 │   ├── db.json                    # 테스트 데이터베이스 (사용자, 설정)
 │   ├── db-backup.json             # 초기 상태 백업 파일
 │   ├── public/                    # 정적 웹 파일
@@ -49,7 +50,7 @@ qa-automation-project/
 ├── docs/                         # 문서화
 │   └── test_cases.xlsx          # Excel 테스트 케이스 명세서
 ├── reports/                      # 테스트 실행 결과
-│   ├── QA_api_ui_automation_report.pdf  # 전체 테스트 결과 PDF (31개 테스트 100% 통과)
+│   ├── QA_api_ui_automation_report.pdf  # 전체 테스트 결과 PDF
 │   └── README.md                # 리포트 설명 문서
 ├── .github/workflows/            # GitHub Actions CI/CD
 │   └── test-automation.yml      # 자동화된 테스트 파이프라인
@@ -58,15 +59,19 @@ qa-automation-project/
 │   ├── WhaTap_QA_API_Tests.postman_collection.json  # API 테스트 컬렉션
 │   └── README.md                # Postman 테스트 가이드
 ├── allure-results/              # Allure 리포트 원시 데이터
+├── base_api_test.py             # API 테스트 기본 클래스 (루트 레벨)
 ├── conftest.py                  # 전역 pytest 설정 및 픽스처
 ├── pytest.ini                   # pytest 실행 설정 파일
 ├── requirements.txt             # Python 패키지 의존성 목록
+├── requirements_inspector.txt   # API Inspector 의존성
 ├── docker-compose.yml           # Docker Compose 설정
 ├── Dockerfile                   # Docker 이미지 빌드 설정
 ├── docker_test.sh              # Docker 컨테이너 테스트 스크립트
 ├── run_tests.sh                # 로컬 테스트 실행 스크립트
 ├── run_ui_tests_local.sh       # UI 테스트 로컬 실행 스크립트
 ├── run_with_allure.sh          # Allure 리포트 포함 테스트 실행
+├── run_api_inspector.sh        # API Request/Response 검사 스크립트
+├── test_api_inspector.py       # API 테스트 케이스 Request/Response 확인 도구
 └── README.md                   # 프로젝트 가이드 문서
 ```
 ## 📝 실행 방법
@@ -95,6 +100,7 @@ docker-compose up -d allure-serve
 # 5. 테스트 완료 후 정리
 docker-compose down
 ```
+
 ### 🖥️ 브라우저에서 UI 테스트 직접 확인하기 (Headed Mode)
 ```bash
 # 1. Docker로 실행
@@ -102,6 +108,24 @@ docker-compose up -d qa-server
 
 # 2. 로컬에서 UI 테스트 실행
 npm install --prefix mock_server && pytest tests/ui/ --headed --slowmo=1000
+```
+
+### 🔍 API Request/Response 검사 도구
+```bash
+# API 테스트 케이스의 Request와 Response 확인
+# 각 테스트케이스가 실제로 어떤 요청을 보내고 응답을 받는지 확인
+
+# 직접 실행
+python3 test_api_inspector.py
+
+# 또는 스크립트로 실행
+./run_api_inspector.sh
+
+# 특정 서버 URL 지정
+python3 test_api_inspector.py http://localhost:3002
+
+# 또는 Postman으로 확인
+# postman/ 폴더의 컬렉션 파일 import
 ```
 
 ## 📊 테스트 실행 결과 요약
@@ -180,6 +204,7 @@ npm install --prefix mock_server && pytest tests/ui/ --headed --slowmo=1000
 - 이 리포트는 QA 자동화 프로젝트의, 교육 목적의 의도적 버그를 포함합니다
 - 실제 프로덕션 환경에서는 이러한 버그가 배포 전에 반드시 수정되어야 합니다
 - 버그는 환경 변수 `BUG_*=false`로 비활성화 가능합니다
+
 
 ## 🔄 CI/CD 실행 방법 (GitHub Actions)
 
