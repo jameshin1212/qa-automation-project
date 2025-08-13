@@ -174,7 +174,8 @@
     </div>
     
     <script>
-        const API_URL = 'http://localhost:3000';
+        // Docker 환경에서는 동일 호스트 사용 (상대 경로)
+        const API_URL = '';
         const form = document.getElementById('registrationForm');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');

@@ -33,6 +33,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - API_BASE_URL=http://qa-server:3000
+      - DOCKER_ENV=true
     volumes:
       - ./allure-results:/app/allure-results
       - ./reports:/app/reports
@@ -43,6 +44,8 @@ services:
       bash -c "
         echo '🧪 Running API Tests...' &&
         echo '================================' &&
+        echo 'Waiting for Mock Server to be ready...' &&
+        sleep 3 &&
         pytest tests/api -v --alluredir=allure-results &&
         echo '================================' &&
         echo '✅ API Tests Completed!' &&
@@ -59,6 +62,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - API_BASE_URL=http://qa-server:3000
+      - DOCKER_ENV=true
     volumes:
       - ./allure-results:/app/allure-results
       - ./reports:/app/reports
@@ -69,6 +73,8 @@ services:
       bash -c "
         echo '🖥️ Running UI Tests...' &&
         echo '================================' &&
+        echo 'Waiting for Mock Server to be ready...' &&
+        sleep 3 &&
         pytest tests/ui -v --alluredir=allure-results &&
         echo '================================' &&
         echo '✅ UI Tests Completed!' &&
@@ -85,6 +91,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - API_BASE_URL=http://qa-server:3000
+      - DOCKER_ENV=true
     volumes:
       - ./allure-results:/app/allure-results
       - ./reports:/app/reports
@@ -95,6 +102,8 @@ services:
       bash -c "
         echo '🧪 Running All Tests (API + UI)...' &&
         echo '================================' &&
+        echo 'Waiting for Mock Server to be ready...' &&
+        sleep 3 &&
         pytest -v --alluredir=allure-results &&
         echo '================================' &&
         echo '✅ All Tests Completed!' &&
@@ -108,12 +117,16 @@ services:
     container_name: whatap-allure-report
     ports:
       - "5050:5050"
+      - "4040:4040"
     volumes:
-      - ./allure-results:/app/allure-results-example/default
+      - ./allure-results:/app/allure-results
+      - ./allure-results:/app/projects/default/results
       - ./allure-report:/app/default-reports
     environment:
-      CHECK_RESULTS_EVERY_SECONDS: 3
+      CHECK_RESULTS_EVERY_SECONDS: 5
       KEEP_HISTORY: "TRUE"
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:5050"
+      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
     networks:
       - qa-network
 
@@ -160,3 +173,4 @@ services:
 networks:
   qa-network:
     driver: bridge
+    name: whatap-qa-network

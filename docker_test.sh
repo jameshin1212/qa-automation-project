@@ -1,59 +1,48 @@
 #!/bin/bash
 
-# Docker test runner script
-# This script ensures proper test execution in Docker environment
+# Docker 테스트 실행 스크립트
+echo "🚀 Starting WhaTap QA Automation Tests with Docker"
+echo "================================================"
 
-echo "🚀 Starting WhaTap QA Automation Tests in Docker..."
+# 색상 정의
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-# Start mock server in background
-echo "📦 Starting Mock Server..."
-cd /app/mock_server
-npm start &
-SERVER_PID=$!
+# 기존 컨테이너 정리
+echo -e "${YELLOW}🧹 Cleaning up existing containers...${NC}"
+docker-compose down
 
-# Wait for server to be ready
+# Docker 이미지 빌드
+echo -e "${YELLOW}🔨 Building Docker images...${NC}"
+docker-compose build
+
+# Mock 서버 시작
+echo -e "${GREEN}📦 Starting Mock Server...${NC}"
+docker-compose up -d qa-server
+
+# 서버가 준비될 때까지 대기
 echo "⏳ Waiting for Mock Server to be ready..."
-for i in {1..30}; do
-    if curl -s http://localhost:3000/config > /dev/null 2>&1; then
-        echo "✅ Mock Server is ready!"
-        # Test the /api/register endpoint
-        curl -s -X POST http://localhost:3000/api/register \
-            -H "Content-Type: application/json" \
-            -d '{"email":"test@test.com","password":"Test1234!"}' > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            echo "✅ /api/register endpoint is working!"
-        else
-            echo "⚠️  /api/register endpoint might have issues"
-        fi
-        break
-    fi
-    echo "Waiting for server... ($i/30)"
-    sleep 1
-done
+sleep 10
 
-# Run tests
-echo "🧪 Running tests..."
-cd /app
-pytest -v
+# API 테스트 실행
+echo -e "${GREEN}🧪 Running API Tests...${NC}"
+docker-compose run --rm api-test
 
-# Get test exit code
-TEST_EXIT_CODE=$?
+# UI 테스트 실행  
+echo -e "${GREEN}🖥️ Running UI Tests...${NC}"
+docker-compose run --rm ui-test
 
-# Kill mock server
-kill $SERVER_PID 2>/dev/null
+# Allure Report 서버 시작
+echo -e "${GREEN}📊 Starting Allure Report Server...${NC}"
+docker-compose up -d allure-report
 
-# Generate Allure report if tests were run
-if [ -d allure-results ] && [ "$(ls -A allure-results)" ]; then
-    echo "📊 Generating Allure report..."
-    allure generate allure-results -o allure-report --clean
-    echo "📊 Allure report generated at /app/allure-report"
-fi
-
-# Exit with test exit code
-if [ $TEST_EXIT_CODE -eq 0 ]; then
-    echo "🎉 All tests passed successfully!"
-else
-    echo "❌ Some tests failed. Check the output above."
-fi
-
-exit $TEST_EXIT_CODE
+echo "================================================"
+echo -e "${GREEN}✅ All tests completed!${NC}"
+echo ""
+echo "📊 View test results:"
+echo "   - Allure Report: http://localhost:5050"
+echo "   - API Documentation: http://localhost:4040"
+echo ""
+echo "🧹 To cleanup, run: docker-compose down"
