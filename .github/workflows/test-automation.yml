@@ -77,20 +77,20 @@ jobs:
     - name: Run API Tests
       if: github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
       run: |
+        mkdir -p reports
         pytest tests/api -v --alluredir=allure-results --html=reports/api_report.html --self-contained-html
-      continue-on-error: true
     
     - name: Run UI Tests
       if: github.event.inputs.test_type == 'ui' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
       run: |
+        mkdir -p reports
         pytest tests/ui -v --alluredir=allure-results --html=reports/ui_report.html --self-contained-html
-      continue-on-error: true
     
     - name: Run Smoke Tests
       if: github.event.inputs.test_type == 'smoke'
       run: |
+        mkdir -p reports
         pytest -m smoke -v --alluredir=allure-results --html=reports/smoke_report.html --self-contained-html
-      continue-on-error: true
     
     - name: Generate Allure Report
       if: always()
