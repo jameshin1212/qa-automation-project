@@ -47,21 +47,26 @@ qa-automation-project/
 │   └── fixtures/                 # 테스트 데이터
 │       └── test_data.json        # 테스트 케이스별 입력 데이터
 ├── docs/                         # 문서화
-│   ├── test_cases.xlsx          # Excel 테스트 케이스 명세서
-│   ├── generate_test_cases.py   # Excel 문서 생성 스크립트
-│   └── generate_test_cases_simple.py  # 간소화된 Excel 생성기
+│   └── test_cases.xlsx          # Excel 테스트 케이스 명세서
 ├── reports/                      # 테스트 실행 결과
 │   ├── QA_api_ui_automation_report.pdf  # 전체 테스트 결과 PDF (31개 테스트 100% 통과)
 │   └── README.md                # 리포트 설명 문서
 ├── .github/workflows/            # GitHub Actions CI/CD
 │   └── test-automation.yml      # 자동화된 테스트 파이프라인
+├── postman/                     # Postman 테스트
+│   ├── WhaTap_QA_API.postman_environment.json  # Postman 환경 변수
+│   ├── WhaTap_QA_API_Tests.postman_collection.json  # API 테스트 컬렉션
+│   └── README.md                # Postman 테스트 가이드
 ├── allure-results/              # Allure 리포트 원시 데이터
-├── venv/                        # Python 가상환경
 ├── conftest.py                  # 전역 pytest 설정 및 픽스처
-├── pytest.ini                  # pytest 실행 설정 파일
+├── pytest.ini                   # pytest 실행 설정 파일
 ├── requirements.txt             # Python 패키지 의존성 목록
-├── requirements-minimal.txt     # 최소 의존성 (호환성 문제 해결용)
-├── run_tests.sh                # 테스트 실행 배치 스크립트
+├── docker-compose.yml           # Docker Compose 설정
+├── Dockerfile                   # Docker 이미지 빌드 설정
+├── docker_test.sh              # Docker 컨테이너 테스트 스크립트
+├── run_tests.sh                # 로컬 테스트 실행 스크립트
+├── run_ui_tests_local.sh       # UI 테스트 로컬 실행 스크립트
+├── run_with_allure.sh          # Allure 리포트 포함 테스트 실행
 └── README.md                   # 프로젝트 가이드 문서
 ```
 ## 📝 실행 방법
@@ -88,90 +93,13 @@ docker-compose up -d allure-serve
 
 ### 🖥️ 브라우저에서 UI 테스트 직접 확인하기 (Headed Mode)
 
-UI 테스트가 실제 브라우저에서 어떻게 동작하는지 시각적으로 확인하려면:
+  # 1. Docker로 실행
+  docker-compose up -d qa-server
 
-> ⚠️ **중요**: Python 3.13은 일부 의존성과 호환성 문제가 있을 수 있습니다. Python 3.10~3.12 사용을 권장합니다.
+  # 2. 로컬에서 UI 테스트 실행
+  npm install --prefix mock_server
+  pytest tests/ui/ --headed --slowmo=1000
 
-```bash
-# 1. Python 버전 확인 
-python3 --version
-
-# 2. Python 가상환경 설정 (3.12 권장)
-python3.12 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. 의존성 설치
-pip install -r requirements.txt
-
-# 만약 greenlet 설치 오류가 발생하면:
-# - Python 3.12 이하 버전 사용 권장
-# - 또는 Docker 환경 사용 (위의 Docker 실행 방법 참조)
-
-# allure 모듈 오류가 발생하면:
-pip install allure-pytest
-
-# 4. Playwright 브라우저 설치
-playwright install chromium
-
-# 5. Mock 서버 시작 (별도 터미널)
-cd mock_server
-npm install
-npm start
-
-# 6. UI 테스트를 브라우저 모드로 실행
-pytest tests/ui/ --headed --slowmo=1000
-
-# 또는 편리한 스크립트 사용 (Mock 서버 자동 시작)
-./run_ui_tests_local.sh
-
-# 옵션 설명:
-# --headed: 실제 브라우저 창을 열어서 테스트 진행
-# --slowmo=1000: 각 동작 사이에 1초 대기 (동작을 천천히 확인)
-```
-
-#### 🎯 개별 UI 테스트 실행 예시
-
-```bash
-# 특정 테스트만 브라우저에서 확인
-pytest tests/ui/test_registration_ui.py::TestRegistrationUI::test_successful_registration --headed --slowmo=500
-
-# 디버그 모드로 실행 (더 자세한 로그)
-PWDEBUG=1 pytest tests/ui/ --headed
-```
-
-### 📋 테스트 모드 비교
-
-| 모드 | 실행 방법 | 장점 | 용도 |
-|------|----------|------|------|
-| **Headless (Docker)** | `docker-compose run --rm ui-test` | 빠른 속도, CI/CD 적합, 환경 독립적 | 자동화 파이프라인 |
-| **Headed (로컬)** | `pytest tests/ui/ --headed` | 시각적 확인 가능 | 디버깅, 데모 |
-| **Debug (로컬)** | `PWDEBUG=1 pytest tests/ui/ --headed` | 단계별 실행 | 문제 해결 |
-
-### 🔧 트러블슈팅
-
-#### Python 버전 호환성 문제
-만약 `greenlet` 설치 오류가 발생하면:
-
-1. **Python 3.12 사용 (권장)**:
-   ```bash
-   # macOS (Homebrew)
-   brew install python@3.12
-   python3.12 -m venv venv
-   
-   # Ubuntu/Debian
-   sudo apt install python3.12 python3.12-venv
-   python3.12 -m venv venv
-   ```
-
-2. **Docker 환경 사용 (가장 안정적)**:
-   ```bash
-   docker-compose run --rm all-test
-   ```
-
-3. **requirements-minimal.txt 사용**:
-   ```bash
-   pip install -r requirements-minimal.txt
-   ```
 
 
 
