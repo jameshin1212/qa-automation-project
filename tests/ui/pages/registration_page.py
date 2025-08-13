@@ -130,8 +130,10 @@ class RegistrationPage:
     def take_screenshot(self, name: str):
         """Take a screenshot of the current page"""
         screenshot = self.page.screenshot()
-        allure.attach(
-            screenshot,
-            name=name,
-            attachment_type=allure.attachment_type.PNG
-        )
+        if ALLURE_AVAILABLE and hasattr(allure, 'attach'):
+            allure.attach(
+                screenshot,
+                name=name,
+                attachment_type=allure.attachment_type.PNG
+            )
+        # Screenshot is taken but not attached if allure is not available
