@@ -37,8 +37,13 @@ module.exports = (req, res, next) => {
       });
     }
     
+    // Check if this is the special XSS bug pattern FIRST
+    // BUG: TC-020 - Specific XSS pattern bypasses validation
+    const isXSSBugPattern = BUGS.XSS_BYPASS && email === '<script>alert(\'XSS\')</script>@test.com';
+    
     // Security: Block SQL injection patterns in email
-    if (email.includes("'") || email.includes('--') || email.includes(';')) {
+    // Skip SQL injection check for the XSS bug pattern (it contains quotes)
+    if (!isXSSBugPattern && (email.includes("'") || email.includes('--') || email.includes(';'))) {
       return res.status(400).json({
         error: '이메일에 허용되지 않는 문자가 포함되어 있습니다.',
         code: 'INVALID_EMAIL'
@@ -46,19 +51,22 @@ module.exports = (req, res, next) => {
     }
     
     // Security: Block XSS patterns in email
-    // BUG: TC-020 - Specific XSS pattern bypasses validation
-    if (BUGS.XSS_BYPASS && email === '<script>alert(\'XSS\')</script>@test.com') {
+    if (isXSSBugPattern) {
       // Intentional bug: This specific XSS pattern is not blocked
       console.log('[BUG TC-020] XSS pattern not blocked:', email);
-    } else if (email.includes('<') || email.includes('>') || email.includes('script')) {
-      return res.status(400).json({
-        error: '이메일에 허용되지 않는 문자가 포함되어 있습니다.',
-        code: 'INVALID_EMAIL'
-      });
+      // Skip XSS validation for this specific pattern - do NOT check for XSS
+    } else {
+      // Normal XSS validation
+      if (email.includes('<') || email.includes('>') || email.includes('script')) {
+        return res.status(400).json({
+          error: '이메일에 허용되지 않는 문자가 포함되어 있습니다.',
+          code: 'INVALID_EMAIL'
+        });
+      }
     }
     
     // Security: Block path traversal patterns in email
-    if (email.includes('../') || email.includes('..\\')) {
+    if (!isXSSBugPattern && (email.includes('../') || email.includes('..\\'))) {
       return res.status(400).json({
         error: '이메일에 허용되지 않는 문자가 포함되어 있습니다.',
         code: 'INVALID_EMAIL'
