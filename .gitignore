@@ -69,4 +69,3 @@ videos/
 
 # Postman
 postman/newman/
-EOF < /dev/null*.mov
