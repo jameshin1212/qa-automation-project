@@ -19,10 +19,17 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 
 # API configuration
 # Docker 환경에서는 qa-server:3000 사용
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-if "qa-server" in API_BASE_URL:
-    # Docker 환경: 명시적으로 qa-server 사용
-    API_BASE_URL = "http://qa-server:3000"
+# Check for dynamic port file first
+port_file = MOCK_SERVER_DIR / ".port"
+if port_file.exists():
+    with open(port_file, 'r') as f:
+        port = f.read().strip()
+        API_BASE_URL = f"http://localhost:{port}"
+else:
+    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
+    if "qa-server" in API_BASE_URL:
+        # Docker 환경: 명시적으로 qa-server 사용
+        API_BASE_URL = "http://qa-server:3000"
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
