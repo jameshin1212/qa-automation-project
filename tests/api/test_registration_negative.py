@@ -3,6 +3,7 @@ Negative test scenarios for user registration API
 """
 import pytest
 import allure
+import json
 from base_api_test import BaseAPITest
 
 @allure.feature("User Registration")
